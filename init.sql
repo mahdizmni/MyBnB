@@ -1,7 +1,5 @@
 -- Tables 
 
--- TODO: contraints
-
 CREATE TABLE Listings (
     ID INT AUTO_INCREMENT,
     type VARCHAR(10) NOT NULL,            -- putting constraint for options in sql or code?
@@ -12,16 +10,16 @@ CREATE TABLE Listings (
 
 CREATE TABLE RatedOnUser (
     ID INT AUTO_INCREMENT,
-    User1.SIN INT,
-    User2.SIN INT,               -- SIN regex
+    User1_SIN INT,              -- we keep the comments of users who deleted account
+    User2_SIN INT,               -- SIN regex
     score INT,                   -- constrain : 0 - 10
     PRIMARY KEY(ID)
 );
 
 CREATE TABLE RatedOnListing (
     ID INT AUTO_INCREMENT,              -- allows multiple comments from the same renter
-    Listing.ID INT,
-    User.SIN INT,
+    Listing_ID INT REFERENCES Listings(ID),
+    User_SIN INT REFERENCES RENTER(SIN),
     score INT,
     PRIMARY KEY(ID)
 );
@@ -35,114 +33,114 @@ CREATE TABLE Period (
 
 CREATE TABLE CommentsOnUser (
     ID INT AUTO_INCREMENT,   
-    User1.SIN INT,
-    User2.SIN INT,
+    User1_SIN INT,
+    User2_SIN INT,
     text TEXT,
     PRIMARY KEY(ID)
 );
 
 CREATE TABLE CommentsOnListing (
     ID INT AUTO_INCREMENT,   
-    Listing.ID INT,
-    User.SIN INT,
+    Listing_ID INT REFERENCES Listings(ID),
+    User_SIN INT REFERENCES Renter(SIN),
     text TEXT NOT NULL,
     PRIMARY KEY(ID)
 );
 
 CREATE TABLE Amenities (
-    type TEXT,                   -- Constrain for types?
+    type VARCHAR(20),                   -- Constrain for length 
     PRIMARY KEY(type)
 );
 
 CREATE TABLE City (
-    name TEXT,
+    name VARCHAR(20),                   -- Constrain for length 
     PRIMARY KEY(name)
 );
 
 CREATE TABLE Country (
-    name TEXT,
+    name VARCHAR(20),                   -- Constrain for length 
     PRIMARY KEY(name)
 );
 
 CREATE TABLE Address (
-    postal_code Varchar(12), 
+    postalcode Varchar(12), 
     street Text,
-    PRIMARY_KEY(postal_code)
+    PRIMARY KEY(postalcode)
 );
 
 CREATE TABLE Renter (
     SIN INT,
-    first_name TEXT NOT NULL,
-    last_name TEXT NOT NULL,
+    firstname TEXT NOT NULL,
+    lastname TEXT NOT NULL,
     birthdate DATE,
     occupation TEXT,
-    email TEXT UNIQUE NOT NULL,      -- regex
+    email varchar(255) UNIQUE NOT NULL,      -- regex
     password TEXT NOT NULL,          -- regex
-    credit_card INT(19) UNIQUE NOT NULL,
+    creditcard INT(19) UNIQUE NOT NULL,
     PRIMARY KEY(SIN)
 );
 
 CREATE TABLE ResidesIn (
-    Address.postal_code TEXT,
-    User.SIN INT,
-    PRIMARY KEY(User.SIN)
+    Address_postalcode varchar(12) REFERENCES Address(postalcode),
+    User_SIN INT,
+    PRIMARY KEY(User_SIN)
 );
 
 CREATE TABLE Host (
     SIN INT NOT NULL,
-    first_name TEXT NOT NULL,
-    last_name TEXT NOT NULL,
+    firstname TEXT NOT NULL,
+    lastname TEXT NOT NULL,
     birthdate DATE,
     occupation TEXT,
-    email TEXT UNIQUE NOT NULL,
+    email varchar(255) UNIQUE NOT NULL,
     password TEXT NOT NULL,             -- regex
     PRIMARY KEY(SIN)
 );
 
 CREATE TABLE BelongsTo (
-    City.name TEXT,
-    Country.name  TEXT,
-    PRIMARY KEY(City.name, Country.name)
+    City_name varchar(20) REFERENCES City(name),
+    Country_name varchar(20) REFERENCES Country(name),
+    PRIMARY KEY(City_name, Country_name)
 );
 
 CREATE TABLE IsIn (
-    Address.postal_code VARCHAR(12),
-    City.name TEXT,
-    PRIMARY KEY(Address.postal_code, City.name)
+    Address_postalcode VARCHAR(12) REFERENCES Address(postalcode),
+    City_name varchar(20) REFERENCES City(name),
+    PRIMARY KEY(Address_postalcode, City_name)
 );
 
 CREATE TABLE Has (
-    Amenities.type TEXT,
-    Listing.ID INT,
-    PRIMARY KEY(Amenities.type, Listing.ID)
+    Amenities_type varchar(20) REFERENCES Amenities(type),
+    Listing_ID INT REFERENCES Listings(ID),
+    PRIMARY KEY(Amenities_type, Listing_ID)
 );
 
 CREATE TABLE LocatedIn (
-    Address.postal_code VARCHAR(12),
-    Listing.ID INT,
-    PRIMARY KEY(Listing.ID)
+    Address_postal_code VARCHAR(12) REFERENCES Address(postalcode),
+    Listing_ID INT REFERENCES Listings(ID),
+    PRIMARY KEY(Listing_ID)
 );
 
 
 CREATE TABLE AvailableIn (
-    Listing.ID INT,
-    Period.ID INT,
+    Listing_ID INT REFERENCES Listings(ID),
+    Period_ID INT REFERENCES Period(ID),
     price INT NOT NULL,
-    PRIMARY KEY(Period.ID, Listing.ID)
+    PRIMARY KEY(Period_ID, Listing_ID)
 );
 
 CREATE TABLE Owns (
-    Host.SIN INT,
-    Listing.ID INT,
-    PRIMARY KEY(Host.SIN, Listing.ID)
+    Host_SIN INT REFERENCES Host(SIN),
+    Listing_ID INT REFERENCES Listings(ID),
+    PRIMARY KEY(Host_SIN, Listing_ID)
 );
 
 CREATE TABLE Books (
-    Booking_ID INT AUTO_INCREMENT,      -- just in case, but may not be neccesarily
-    Renter.SIN INT,
-    Listing.ID INT,
+    BookingID INT AUTO_INCREMENT,      -- just in case, but may not be neccesarily
+    Renter_SIN INT REFERENCES Renter(SIN),
+    Listing_ID INT REFERENCES Listings(ID),
     start INT,
     end INT,
     isReserved BOOL,              -- may not be needed
-    PRIMARY KEY(Booking_ID)
+    PRIMARY KEY(BookingID)
 );
