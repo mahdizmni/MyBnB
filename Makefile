@@ -1,2 +1,2 @@
 all :
-	@mysql -uroot -p mybnb < init.sql
+	@mysql -uroot -p MyBnB < init.sql
