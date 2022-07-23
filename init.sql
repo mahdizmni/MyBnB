@@ -10,8 +10,8 @@ CREATE TABLE Listings (
 
 CREATE TABLE RatedOnUser (
     ID INT AUTO_INCREMENT,
-    User1_SIN INT,              -- we keep the comments of users who deleted account
-    User2_SIN INT,               -- SIN regex
+    User1_SIN INT REFERENCES User(SIN),              -- we keep the comments of users who deleted account
+    User2_SIN INT REFERENCES User(SIN),               -- SIN regex
     score INT,                   -- constrain : 0 - 10
     PRIMARY KEY(ID)
 );
@@ -33,8 +33,8 @@ CREATE TABLE Period (
 
 CREATE TABLE CommentsOnUser (
     ID INT AUTO_INCREMENT,   
-    User1_SIN INT,
-    User2_SIN INT,
+    User1_SIN INT REFERENCES User(SIN),
+    User2_SIN INT REFERENCES User(SIN),
     text TEXT,
     PRIMARY KEY(ID)
 );
@@ -68,7 +68,7 @@ CREATE TABLE Address (
     PRIMARY KEY(postalcode)
 );
 
-CREATE TABLE Renter (
+CREATE TABLE User (
     SIN INT,
     firstname TEXT NOT NULL,
     lastname TEXT NOT NULL,
@@ -82,19 +82,8 @@ CREATE TABLE Renter (
 
 CREATE TABLE ResidesIn (
     Address_postalcode varchar(12) REFERENCES Address(postalcode),
-    User_SIN INT REFERENCES RENTER(SIN),
+    User_SIN INT REFERENCES User(SIN),
     PRIMARY KEY(User_SIN)
-);
-
-CREATE TABLE Host (
-    SIN INT NOT NULL,
-    firstname TEXT NOT NULL,
-    lastname TEXT NOT NULL,
-    birthdate DATE,
-    occupation TEXT,
-    email varchar(255) UNIQUE NOT NULL,
-    password TEXT NOT NULL,             -- regex
-    PRIMARY KEY(SIN)
 );
 
 CREATE TABLE BelongsTo (
@@ -130,14 +119,14 @@ CREATE TABLE AvailableIn (
 );
 
 CREATE TABLE Owns (
-    Host_SIN INT REFERENCES Host(SIN),
+    Host_SIN INT  REFERENCES User(SIN),
     Listing_ID INT REFERENCES Listings(ID),
     PRIMARY KEY(Host_SIN, Listing_ID)
 );
 
 CREATE TABLE Books (
     BookingID INT AUTO_INCREMENT,      -- just in case, but may not be neccesarily
-    Renter_SIN INT REFERENCES Renter(SIN),
+    Renter_SIN INT REFERENCES User(SIN),
     Listing_ID INT REFERENCES Listings(ID),
     start INT,
     end INT,
