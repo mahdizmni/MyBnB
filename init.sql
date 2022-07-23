@@ -82,7 +82,7 @@ CREATE TABLE Renter (
 
 CREATE TABLE ResidesIn (
     Address_postalcode varchar(12) REFERENCES Address(postalcode),
-    User_SIN INT,
+    User_SIN INT REFERENCES RENTER(SIN),
     PRIMARY KEY(User_SIN)
 );
 
