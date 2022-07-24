@@ -12,4 +12,4 @@ CSCC43 Course Project
 - [x]  SQL setup - Mahdi, July 20
 - [x] Java setup - Peter, July 20
 - [ ] Change ER and Schema according to init.sql (not urgent)
-- [ ] Decide on how we want to handle foreign key manipulaitons on delete
+- [x] Decide on how we want to handle foreign key manipulaitons on delete
