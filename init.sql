@@ -76,7 +76,7 @@ CREATE TABLE User (
     occupation TEXT,
     email varchar(255) UNIQUE NOT NULL,      -- regex
     password TEXT NOT NULL,          -- regex
-    creditcard BIGINT(19) UNIQUE NOT NULL,
+    creditcard varchar(19) UNIQUE NOT NULL,
     PRIMARY KEY(SIN)
 );
 
