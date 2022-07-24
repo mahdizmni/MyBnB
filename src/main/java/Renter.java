@@ -10,8 +10,12 @@ public class Renter extends User{
         Scanner scan = new Scanner(System.in);
         boolean exit = false;
         while(!exit){
-            Utils.printDivider(this.firstname + "'s Menu (Renter)");
-            System.out.print("Please select an option from below: ");
+            Utils.printMenu(this.firstname + "'s Menu (Renter)",
+                    new String[]{
+                            "Book a listing",
+                            "Cancel a booking",
+                            "Get history of past hosts",
+                            "Comment on past hosts"});
             String userInput = scan.nextLine();
             switch (userInput) {
                 case "1"-> bookListing();

@@ -8,12 +8,7 @@ public class App {
         User user = null;
         boolean exit = false;
         while(!exit && user == null){
-            Utils.printDivider("Login/Register");
-            System.out.println("Please select an option from below: ");
-            System.out.println("\t 1 -> Register");
-            System.out.println("\t 2 -> Login");
-            System.out.println("\t q -> exit");
-            System.out.print("Choose an option: ");
+            Utils.printMenu("Register/Login", new String[]{"Register", "Login"});
             String userInput = scan.nextLine();
             switch (userInput) {
                 case "1"-> Register.register();
@@ -25,12 +20,7 @@ public class App {
 
         exit = false;
         while(!exit){
-            Utils.printDivider("Renter/Host");
-            System.out.println("Please select an option from below: ");
-            System.out.println("\t 1 -> Renter");
-            System.out.println("\t 2 -> Host");
-            System.out.println("\t q -> exit");
-            System.out.print("Choose an option: ");
+            Utils.printMenu("Renter/Host", new String[]{"Renter", "Host"});
             String userInput = scan.nextLine();
             switch (userInput) {
                 case "1":

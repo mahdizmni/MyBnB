@@ -10,8 +10,15 @@ public class Host extends User{
         Scanner scan = new Scanner(System.in);
         boolean exit = false;
         while(!exit){
-            Utils.printDivider(this.firstname + "'s Menu (Host)");
-            System.out.print("Please select an option from below: ");
+            Utils.printMenu(this.firstname + "'s Menu (Host)",
+                    new String[]{
+                            "Create a listing",
+                            "Cancel a booking",
+                            "Remove a listing",
+                            "Update price of listing",
+                            "Update availability of listing",
+                            "Get history of past renters",
+                            "Comment on past renters"});
             String userInput = scan.nextLine();
             switch (userInput) {
                 case "1"-> createListing();
@@ -27,7 +34,7 @@ public class Host extends User{
     }
 
     public void createListing(){
-        System.out.println("Book a listing");
+        System.out.println("create a listing");
     }
 
     public void cancelBooking(){
@@ -51,6 +58,6 @@ public class Host extends User{
     }
 
     public void comment(){
-        System.out.println("Comment on past hosts");
+        System.out.println("Comment on past renters");
     }
 }

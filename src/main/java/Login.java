@@ -18,7 +18,7 @@ public class Login {
             }
         }
         catch (Exception e){
-            Utils.printError("Something went wrong!", e.getCause());
+            Utils.printError("Something went wrong!", e.getMessage());
         }
         return null;
     }
