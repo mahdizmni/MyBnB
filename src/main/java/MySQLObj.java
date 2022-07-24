@@ -1,7 +1,7 @@
 import java.sql.*;
 
 public class MySQLObj {
-    private final String uriDb = "jdbc:mysql://localhost:3306/c43bnb";
+    private final String uriDb = "jdbc:mysql://localhost:3306/MyBnB";
     private final String username = "root";
     private final String password = "";
     public Connection con;
