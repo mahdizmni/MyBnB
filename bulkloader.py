@@ -1,6 +1,4 @@
 
-from hawkey import QueryException
-
 
 f = open("sample.sql", "w")
 fname = open("first-names.txt", "r")
