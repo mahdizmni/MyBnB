@@ -48,6 +48,26 @@ public class MySQLObj {
         return null;
     }
 
+    public static boolean checkEmailExists(String email) throws SQLException {
+        String query = "SELECT * FROM User WHERE email = '%s'";
+        query = String.format(query, email);
+        ResultSet rs = st.executeQuery(query);
+        return rs.next();
+    }
+
+    public static boolean registerUser(int sin, String firstname, String lastname, int birthDate, String occupation, String email, String password, String creditcard) {
+        try{
+            String query = "INSERT INTO User VALUES (%d,'%s','%s',%d,'%s','%s','%s','%s')";
+            query = String.format(query, sin, firstname, lastname, birthDate, occupation, email, password, creditcard);
+            st.execute(query);
+            return true;
+        }
+        catch(Exception e){
+            Utils.printError("Failed to register user: ", e.getMessage());
+        }
+        return false;
+    }
+
     public ResultSet getAllUsers() throws SQLException {
         String query = "SELECT * FROM User";
         return st.executeQuery(query);
