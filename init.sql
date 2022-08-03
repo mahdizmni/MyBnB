@@ -12,9 +12,24 @@ CREATE TABLE User (
     PRIMARY KEY(SIN)
 );
 
-CREATE TABLE Listings (
+CREATE TABLE Type (
+    type VARCHAR(10) NOT NULL,            -- putting constraint for options in sql or code?
+    PRIMARY KEY(type)
+)
+
+CREATE TABLE ListingsType (
     ID INT AUTO_INCREMENT,
     type VARCHAR(10) NOT NULL,            -- putting constraint for options in sql or code?
+    FOREIGN KEY(ID) REFERENCES Listings(ID)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+    FOREIGN KEY(type) REFERENCES Type(type)
+        ON DELETE SET NULL
+        ON UPDATE CASCADE,
+)
+
+CREATE TABLE Listings (
+    ID INT AUTO_INCREMENT,
     latitude DECIMAL(10, 8),            -- https://yeahexp.com/data-type-for-latitude-and-longitude/
     longitude DECIMAL(11, 8),               -- allowing NULLs
     PRIMARY KEY(ID)
