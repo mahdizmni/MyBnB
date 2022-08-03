@@ -9,7 +9,12 @@ CSCC43 Course Project
 
 ### Todo
 - [x] ER Diagram + Schemas, July 3rd
-- [x]  SQL setup - Mahdi, July 20
+- [x] SQL setup - Mahdi, July 20
 - [x] Java setup - Peter, July 20
 - [ ] Change ER and Schema according to init.sql (not urgent)
-- [x] Decide on how we want to handle foreign key manipulaitons on delete
+- [x] Decide on how we want to handle foreign key manipulations on delete
+- [ ] Renter Class - Peter
+- [ ] Host Class - Mahdi
+- [ ] Report
+- [ ] Host toolkit
+- [ ] Sample Data to bulk load db
