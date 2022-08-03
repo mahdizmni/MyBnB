@@ -226,10 +226,9 @@ CREATE TABLE Books (
     BookingID INT AUTO_INCREMENT,      -- just in case, but may not be neccesarily
     Renter_SIN INT,
     Listing_ID INT,
-    start INT,
-    end INT,
-    isReserved BOOL,              -- may not be needed
-    Canceled BOOL,
+    start DATE NOT NULL,
+    end DATE NOT NULL,
+    isReserved BOOL,
     PRIMARY KEY(BookingID),
     
     FOREIGN KEY (Renter_SIN) REFERENCES User(SIN)
