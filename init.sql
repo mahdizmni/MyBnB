@@ -13,18 +13,23 @@ CREATE TABLE User (
 );
 
 CREATE TABLE Type (
-    type VARCHAR(10) NOT NULL,            -- putting constraint for options in sql or code?
-    PRIMARY KEY(type)
+    ID INT AUTO_INCREMENT,
+    type VARCHAR(10) UNIQUE NOT NULL,            -- putting constraint for options in sql or code?
+
+    PRIMARY KEY(ID)
 )
 
 CREATE TABLE ListingsType (
     ID INT AUTO_INCREMENT,
-    type VARCHAR(10) NOT NULL,            -- putting constraint for options in sql or code?
+    type_ID INT,            -- putting constraint for options in sql or code?
+
+    PRIMARY KEY(ID, type_ID),
+
     FOREIGN KEY(ID) REFERENCES Listings(ID)
         ON DELETE CASCADE
         ON UPDATE CASCADE,
-    FOREIGN KEY(type) REFERENCES Type(type)
-        ON DELETE SET NULL
+    FOREIGN KEY(type_ID) REFERENCES Type(ID)
+        ON DELETE SET CASCADE 
         ON UPDATE CASCADE,
 )
 
@@ -105,18 +110,21 @@ CREATE TABLE CommentsOnListing (
 );
 
 CREATE TABLE Amenities (
-    type VARCHAR(20),                   -- Constrain for length 
-    PRIMARY KEY(type)
+    INT ID AUTO_INCREMENT,
+    type VARCHAR(20) UNIQUE NOT NULL,                   -- Constrain for length
+    PRIMARY KEY(ID)
 );
 
 CREATE TABLE City (
-    name VARCHAR(20),                   -- Constrain for length 
-    PRIMARY KEY(name)
+    INT ID AUTO_INCREMENT,
+    name VARCHAR(20) NOT NULL UNIQUE,                   -- Constrain for length 
+    PRIMARY KEY(ID)
 );
 
 CREATE TABLE Country (
-    name VARCHAR(20),                   -- Constrain for length 
-    PRIMARY KEY(name)
+    INT ID AUTO_INCREMENT,
+    name VARCHAR(20) UNIQUE NOT NULL,                   -- Constrain for length 
+    PRIMARY KEY(ID)
 );
 
 CREATE TABLE Address (
@@ -139,41 +147,41 @@ CREATE TABLE ResidesIn (
 );
 
 CREATE TABLE BelongsTo (
-    City_name varchar(20),
-    Country_name varchar(20),
-    PRIMARY KEY(City_name, Country_name),
+    City_ID INT,
+    Country_ID INT,
+    PRIMARY KEY(City_ID, Country_ID),
 
-    FOREIGN KEY (City_name) REFERENCES City(name)
+    FOREIGN KEY (City_ID) REFERENCES City(ID)
         ON DELETE CASCADE
         ON UPDATE CASCADE,
-    FOREIGN KEY (Country_name) REFERENCES Country(name)
+    FOREIGN KEY (Country_ID) REFERENCES Country(ID)
         ON DELETE CASCADE
         ON UPDATE CASCADE
 );
 
 CREATE TABLE IsIn (
     Address_postalcode VARCHAR(12), 
-    City_name varchar(20),
-    PRIMARY KEY(Address_postalcode, City_name),
+    City_ID INT,
+    PRIMARY KEY(Address_postalcode, City_ID),
 
     FOREIGN KEY (Address_postalcode) REFERENCES Address(postalcode)
         ON DELETE CASCADE
         ON UPDATE CASCADE,
 
-    FOREIGN KEY (City_name) REFERENCES City(name)
+    FOREIGN KEY (City_ID) REFERENCES City(ID)
         ON DELETE CASCADE
         ON UPDATE CASCADE
 );
 
 CREATE TABLE Has (
-    Amenities_type varchar(20),
+    Amenities_ID INT,
     Listing_ID INT,
-    PRIMARY KEY(Amenities_type, Listing_ID),
+    PRIMARY KEY(Amenities_ID, Listing_ID),
 
     FOREIGN KEY (Listing_ID) REFERENCES Listings(ID)
         ON DELETE CASCADE
         ON UPDATE CASCADE,
-    FOREIGN KEY (Amenities_type) REFERENCES Amenities(type)
+    FOREIGN KEY (Amenities_ID) REFERENCES Amenities(ID)
         ON DELETE CASCADE
         ON UPDATE CASCADE
 );
