@@ -110,19 +110,19 @@ CREATE TABLE CommentsOnListing (
 );
 
 CREATE TABLE Amenities (
-    INT ID AUTO_INCREMENT,
+    ID INT AUTO_INCREMENT,
     type VARCHAR(20) UNIQUE NOT NULL,                   -- Constrain for length
     PRIMARY KEY(ID)
 );
 
 CREATE TABLE City (
-    INT ID AUTO_INCREMENT,
+    ID INT AUTO_INCREMENT,
     name VARCHAR(20) NOT NULL UNIQUE,                   -- Constrain for length 
     PRIMARY KEY(ID)
 );
 
 CREATE TABLE Country (
-    INT ID AUTO_INCREMENT,
+    ID INT AUTO_INCREMENT,
     name VARCHAR(20) UNIQUE NOT NULL,                   -- Constrain for length 
     PRIMARY KEY(ID)
 );
