@@ -17,7 +17,14 @@ CREATE TABLE Type (
     type VARCHAR(10) UNIQUE NOT NULL,            -- putting constraint for options in sql or code?
 
     PRIMARY KEY(ID)
-)
+);
+
+CREATE TABLE Listings (
+    ID INT AUTO_INCREMENT,
+    latitude DECIMAL(10, 8),            -- https://yeahexp.com/data-type-for-latitude-and-longitude/
+    longitude DECIMAL(11, 8),               -- allowing NULLs
+    PRIMARY KEY(ID)
+);
 
 CREATE TABLE ListingsType (
     ID INT AUTO_INCREMENT,
@@ -29,15 +36,8 @@ CREATE TABLE ListingsType (
         ON DELETE CASCADE
         ON UPDATE CASCADE,
     FOREIGN KEY(type_ID) REFERENCES Type(ID)
-        ON DELETE SET CASCADE 
-        ON UPDATE CASCADE,
-)
-
-CREATE TABLE Listings (
-    ID INT AUTO_INCREMENT,
-    latitude DECIMAL(10, 8),            -- https://yeahexp.com/data-type-for-latitude-and-longitude/
-    longitude DECIMAL(11, 8),               -- allowing NULLs
-    PRIMARY KEY(ID)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
 );
 
 CREATE TABLE RatedOnUser (
