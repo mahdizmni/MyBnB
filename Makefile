@@ -8,6 +8,7 @@ all :
 	@mysql -uroot -p MyBnB < setup/period.sql && echo Period data loaded.
 	@mysql -uroot -p MyBnB < setup/availablein.sql && echo AvailableIn data loaded.
 	@mysql -uroot -p MyBnB < setup/books.sql && echo Books data loaded.
+	@mysql -uroot -p MyBnB < setup/amenities.sql && echo Amenities data loaded.
 	@mysql -uroot -p MyBnB < setup/has.sql && echo Has data loaded.
 	@mysql -uroot -p MyBnB < setup/city.sql && echo City data loaded.
 	@mysql -uroot -p MyBnB < setup/country.sql && echo Country data loaded.
