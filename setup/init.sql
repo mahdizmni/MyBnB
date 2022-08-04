@@ -204,7 +204,7 @@ CREATE TABLE LocatedIn (
 CREATE TABLE AvailableIn (
     Listing_ID INT,
     Period_ID INT,
-    price INT NOT NULL,
+    price DECIMAL(10,2) NOT NULL,
     PRIMARY KEY(Period_ID, Listing_ID),
 
     FOREIGN KEY (Listing_ID) REFERENCES Listings(ID)
