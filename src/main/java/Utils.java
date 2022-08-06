@@ -1,3 +1,7 @@
+import dnl.utils.text.table.TextTable;
+
+import java.util.ArrayList;
+
 public class Utils {
     public static String divider = "=============";
 
@@ -28,5 +32,11 @@ public class Utils {
     public static void clearConsole() {
         System.out.print("\033[H\033[2J");
         System.out.flush();
+    }
+
+    public static void printTable(String[] columnNames, ArrayList<ArrayList<Object>> data){
+        Object[][] objectArray = data.stream().map(u -> u.toArray(new Object[0])).toArray(Object[][]::new);
+        TextTable tt = new TextTable(columnNames, objectArray);
+        tt.printTable();
     }
 }

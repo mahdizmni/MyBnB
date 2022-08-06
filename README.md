@@ -17,4 +17,4 @@ CSCC43 Course Project
 - [ ] Host Class - Mahdi
 - [ ] Report
 - [ ] Host toolkit
-- [ ] Sample Data to bulk load db
+- [x] Sample Data to bulk load db - Peter
