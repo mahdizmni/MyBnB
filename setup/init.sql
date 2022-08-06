@@ -32,7 +32,7 @@ CREATE TABLE ListingsType (
 
     PRIMARY KEY(ID, type_ID),
 
-    FOREIGN KEY(ID) REFERENCES Listings(ID)
+    FOREIGN KEY(Listings_ID) REFERENCES Listings(ID)
         ON DELETE CASCADE
         ON UPDATE CASCADE,
     FOREIGN KEY(type_ID) REFERENCES Type(ID)
