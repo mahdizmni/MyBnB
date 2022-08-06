@@ -111,4 +111,31 @@ public class MySQLObj {
         PreparedStatement ps = con.prepareStatement(query);
         ResultSet rs = ps.executeQuery();
     }
+    public static void addToListingsType(int listings_id, int type_id) throws SQLException {
+        String query = "INSERT INTO ListingsType VALUES (%d, %d)";
+        query = String.format(query, listings_id, type_id);
+        PreparedStatement ps = con.prepareStatement(query);
+        ResultSet rs = ps.executeQuery();
+    }
+    public static int getAddressID(String postalcode, int num) throws SQLException {
+        String query = "SELECT ID FROM Address WHERE postalcode == %s AND num == %s";
+        query = String.format(query, postalcode, num);
+        PreparedStatement ps = con.prepareStatement(query);
+        ResultSet rs = ps.executeQuery();
+        return rs.getInt(1);
+    }
+    public static int getCountryID(String name) throws SQLException {
+        String query = "SELECT ID FROM Country WHERE name == %s";
+        query = String.format(query, name);
+        PreparedStatement ps = con.prepareStatement(query);
+        ResultSet rs = ps.executeQuery();
+        return rs.getInt(1);
+    }
+    public static int getCityID(String name) throws SQLException {
+        String query = "SELECT ID FROM City WHERE name == %s";
+        query = String.format(query, name);
+        PreparedStatement ps = con.prepareStatement(query);
+        ResultSet rs = ps.executeQuery();
+        return rs.getInt(1);
+    }
 }

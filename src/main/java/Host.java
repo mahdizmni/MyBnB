@@ -8,7 +8,7 @@ public class Host extends User{
         this.setEmail(u.getEmail());
     }
 
-    public void mainLoop(){
+    public void mainLoop() throws SQLException {
         Scanner scan = new Scanner(System.in);
         boolean exit = false;
         while(!exit){
@@ -39,10 +39,9 @@ public class Host extends User{
         System.out.println("create a listing");
         double lat, lon;
         String amenities, type;
-        int start, end, num;
+        int start, end, num, address_id, city_id, country_id, type_id, listing_id;
         String city, country, postalcode, street, buff;
-        boolean addToAddress, addToCity, addToCountry, addToType;
-        addToAddress = true; addToCity = true; addToCountry = true; addToType = true;
+        boolean[] boolarr = new boolean[3];
 
         System.out.println("please insert the postalcode with space");
         postalcode = App.scan.nextLine();
@@ -65,42 +64,50 @@ public class Host extends User{
         // TA:  more efficient
         try {
             MySQLObj.addToAddress(postalcode, street, num);
+            address_id = MySQLObj.getRecentID();
         } catch (SQLException e) {
-            addToAddress = false;
+            boolarr[0] = true;
         }
 
         try {
             MySQLObj.addToCity(city);
+            city_id = MySQLObj.getRecentID();
         } catch (SQLException e) {
-            addToCity = false;
+            boolarr[1] = true;
         }
 
         try {
             MySQLObj.addToCountry(country);
+            country_id = MySQLObj.getRecentID();
         } catch (SQLException e) {
-            addToCountry = false;
+            boolarr[2] = true;
         }
 
-        try {
-            MySQLObj.addToType(type);
-        } catch (SQLException e) {
-            addToType = false;
-        }
-
-        if (!(addToAddress && addToCity && addToCountry && addToType)) {
+        if (boolarr[0] && boolarr[1] && boolarr[3]) {
             System.out.println("listing already exists! plz try again");
             return;
         }
 
+        if (boolarr[0])
+            address_id = MySQLObj.getAddressID(postalcode, num);
+        if (boolarr[1])
+            city_id = MySQLObj.getCityID(city);
+        if (boolarr[2])
+            country_id = MySQLObj.getCountryID(country);
 
 
-        // Inserting into Listings
-        try {
-            MySQLObj.addToListings(lat, lon);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-        int listing_id = MySQLObj.getRecentID();
+        MySQLObj.addToType(type);
+        type_id = MySQLObj.getRecentID();
+
+        MySQLObj.addToListings(lat, lon);
+        listing_id = MySQLObj.getRecentID();
+
+        // Linking corresponding tables
+        MySQLObj.addToListingsType(listing_id, type_id);
+
+
+
+
 
         System.out.println("please insert one amenity at a time. press q to finish");
         boolean stop = false;
