@@ -128,7 +128,7 @@ CREATE TABLE Country (
 );
 
 CREATE TABLE Address (
-    ID INT,
+    ID INT AUTO_INCREMENT,
     postalcode Varchar(12), 
     street Text,
     num INT,
