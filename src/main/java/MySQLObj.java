@@ -79,7 +79,9 @@ public class MySQLObj {
             query = String.format(query, latitude, longitude);
             PreparedStatement ps = con.prepareStatement(query);
             ps.executeUpdate();
-        } catch (SQLException e) {}
+        } catch (SQLException e) {
+//            System.out.println(e.getMessage());
+        }
     }
 
     public static int getRecentID() throws SQLException {
@@ -87,9 +89,10 @@ public class MySQLObj {
             String query = "SELECT LAST_INSERT_ID()";
             PreparedStatement ps = con.prepareStatement(query);
             ResultSet rs = ps.executeQuery();
+            rs.next();
             return rs.getInt(1);
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+ //           System.out.println(e.getMessage());
             return -1;
         }
     }
@@ -102,6 +105,7 @@ public class MySQLObj {
             ps.executeUpdate();
             return true;
         } catch (SQLException e) {
+  //          System.out.println(e.getMessage());
             return false;
         }
     }
@@ -113,6 +117,7 @@ public class MySQLObj {
             ps.executeUpdate();
             return true;
         } catch (SQLException e ) {
+   //         System.out.println(e.getMessage());
             return false;
         }
     }
@@ -124,7 +129,7 @@ public class MySQLObj {
             ps.executeUpdate();
             return true;
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+    //        System.out.println(e.getMessage());
             return false;
         }
     }
@@ -136,102 +141,181 @@ public class MySQLObj {
             ps.executeUpdate();
             return true;
         } catch (SQLException e) {
+     //       System.out.println(e.getMessage());
             return false;
         }
     }
     public static void addToListingsType(int listings_id, int type_id) throws SQLException {
-        String query = "INSERT INTO ListingsType VALUES (%d, %d)";
-        query = String.format(query, listings_id, type_id);
-        PreparedStatement ps = con.prepareStatement(query);
-        ps.executeUpdate();
-    }
-    public static void addToBelongsTo(String city, String country) throws SQLException {
         try {
-            String query = "INSERT INTO BelongsTo VALUES ('%s', '%s')";
-            query = String.format(query, city, country);
+            String query = "INSERT INTO ListingsType VALUES (%d, %d)";
+            query = String.format(query, listings_id, type_id);
             PreparedStatement ps = con.prepareStatement(query);
             ps.executeUpdate();
-        } catch (SQLException e) {}
+        } catch (SQLException e) {
+     //       System.out.println(e.getMessage());
+        }
     }
-    public static void addToAmenities(String name) throws SQLException {
-        String query = "INSERT INTO Amenities(type) VALUES ('%s')";
-        query = String.format(query, name);
-        PreparedStatement ps = con.prepareStatement(query);
-        ps.executeUpdate();
+    public static void addToBelongsTo(int city_id, int country_id) throws SQLException {
+        try {
+            String query = "INSERT INTO BelongsTo VALUES ('%s', '%s')";
+            query = String.format(query, city_id, country_id);
+            PreparedStatement ps = con.prepareStatement(query);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+       //     System.out.println(e.getMessage());
+        }
+    }
+    public static boolean addToAmenities(String name) throws SQLException {
+        try {
+            String query = "INSERT INTO Amenities(type) VALUES ('%s')";
+            query = String.format(query, name);
+            PreparedStatement ps = con.prepareStatement(query);
+            ps.executeUpdate();
+            return true;
+        }
+        catch (SQLException e) {
+        //    System.out.println(e.getMessage());
+            return false;
+        }
     }
     public static void addToLocatedIn(int address_id, int listing_id) throws SQLException {
-        String query = "INSERT INTO LocatedIn VALUES (%d, %d)";
-        query = String.format(query, address_id, listing_id);
-        PreparedStatement ps = con.prepareStatement(query);
-        ps.executeUpdate();
+        try {
+            String query = "INSERT INTO LocatedIn VALUES (%d, %d)";
+            query = String.format(query, address_id, listing_id);
+            PreparedStatement ps = con.prepareStatement(query);
+            ps.executeUpdate();
+        }
+        catch (SQLException e) {
+         //   System.out.println(e.getMessage());
+        }
     }
     public static void addToIsIn(int address_id, int city_id) throws SQLException {
-        String query = "INSERT INTO IsIn VALUES (%d, %d)";
-        query = String.format(query, address_id, city_id);
-        PreparedStatement ps = con.prepareStatement(query);
-        ps.executeUpdate();
+        try {
+            String query = "INSERT INTO IsIn VALUES (%d, %d)";
+            query = String.format(query, address_id, city_id);
+            PreparedStatement ps = con.prepareStatement(query);
+            ps.executeUpdate();
+        }
+        catch (SQLException e) {
+        //    System.out.println(e.getMessage());
+        }
     }
-    public static void addToPeriod(int start, int end) throws SQLException {
-        String query = "INSERT INTO Period(start, end) VALUES (%d, %d)";
-        query = String.format(query, start, end);
-        PreparedStatement ps = con.prepareStatement(query);
-        ps.executeUpdate();
+    public static boolean addToPeriod(int start, int end) throws SQLException {
+        try {
+            String query = "INSERT INTO Period(start, end) VALUES (%d, %d)";
+            query = String.format(query, start, end);
+            PreparedStatement ps = con.prepareStatement(query);
+            ps.executeUpdate();
+            return true;
+        }
+        catch (SQLException e) {
+         //   System.out.println(e.getMessage());
+            return false;
+        }
     }
     public static void addToHas(int amenities_id, int listing_id) throws SQLException {
+        try {
         String query = "INSERT INTO Has VALUES (%d, %d)";
         query = String.format(query, amenities_id, listing_id);
         PreparedStatement ps = con.prepareStatement(query);
         ps.executeUpdate();
+        } catch (SQLException e) {
+         //   System.out.println(e.getMessage());
+        }
     }
-    public static void addToAvailableIn(int listing_id, int period_id, int price) throws SQLException {
+    public static boolean addToAvailableIn(int listing_id, int period_id, int price) throws SQLException {
+        try {
+
         String query = "INSERT INTO AvailableIn VALUES (%d, %d, %d)";
         query = String.format(query, listing_id, period_id, price);
         PreparedStatement ps = con.prepareStatement(query);
         ps.executeUpdate();
+        return true;
+        } catch (SQLException e) {
+          //  System.out.println(e.getMessage());
+            return false;
+        }
     }
     public static int getPeriodID(int start, int end) throws SQLException {
-        String query = "SELECT ID FROM Period WHERE start == %d AND end == %d";
-        query = String.format(query, start, end);
-        PreparedStatement ps = con.prepareStatement(query);
-        ResultSet rs = ps.executeQuery();
-        if (rs.first())
-            return rs.getInt(1);
-        else
+        try {
+            String query = "SELECT ID FROM Period WHERE start = %d AND end = %d";
+            query = String.format(query, start, end);
+            PreparedStatement ps = con.prepareStatement(query);
+            ResultSet rs = ps.executeQuery();
+            rs.next();
+            if (rs.next())
+                return rs.getInt(1);
+            else
+                return -1;
+        } catch (SQLException e) {
+         //   System.out.println(e.getMessage());
             return -1;
+        }
     }
     public static int getAddressID(String postalcode, int num) throws SQLException {
-        String query = "SELECT ID FROM Address WHERE postalcode == '%s' AND num == '%s'";
+        try {
+        String query = "SELECT ID FROM Address WHERE postalcode = '%s' AND num = %d";
         query = String.format(query, postalcode, num);
         PreparedStatement ps = con.prepareStatement(query);
         ResultSet rs = ps.executeQuery();
+            rs.next();
         return rs.getInt(1);
+        } catch (SQLException e) {
+//            System.out.println(e.getMessage());
+            return -1;
+        }
     }
     public static int getCountryID(String name) throws SQLException {
-        String query = "SELECT ID FROM Country WHERE name == '%s'";
-        query = String.format(query, name);
-        PreparedStatement ps = con.prepareStatement(query);
-        ResultSet rs = ps.executeQuery();
-        return rs.getInt(1);
+        try {
+            String query = "SELECT ID FROM Country WHERE name = '%s'";
+            query = String.format(query, name);
+            PreparedStatement ps = con.prepareStatement(query);
+            ResultSet rs = ps.executeQuery();
+            rs.next();
+            return rs.getInt(1);
+        } catch (SQLException e) {
+ //           System.out.println(e.getMessage());
+            return -1;
+        }
     }
     public static int getAmenitiesID(String name) throws SQLException {
-        String query = "SELECT ID FROM Amenities WHERE name == '%s'";
-        query = String.format(query, name);
-        PreparedStatement ps = con.prepareStatement(query);
-        ResultSet rs = ps.executeQuery();
-        return rs.getInt(1);
+        try {
+            String query = "SELECT ID FROM Amenities WHERE type = '%s'";
+            query = String.format(query, name);
+            PreparedStatement ps = con.prepareStatement(query);
+            ResultSet rs = ps.executeQuery();
+            rs.next();
+            return rs.getInt(1);
+        } catch (SQLException e) {
+  //          System.out.println(e.getMessage());
+            return -1;
+        }
     }
     public static int getCityID(String name) throws SQLException {
-        String query = "SELECT ID FROM City WHERE name == '%s'";
-        query = String.format(query, name);
-        PreparedStatement ps = con.prepareStatement(query);
-        ResultSet rs = ps.executeQuery();
-        return rs.getInt(1);
+        try {
+            String query = "SELECT ID FROM City WHERE name = '%s'";
+            query = String.format(query, name);
+            PreparedStatement ps = con.prepareStatement(query);
+            ResultSet rs = ps.executeQuery();
+            rs.next();
+            return rs.getInt(1);
+        } catch (SQLException e) {
+   //         System.out.println(e.getMessage());
+            return -1;
+        }
     }
     public static int getTypeID(String name) throws SQLException {
-        String query = "SELECT ID FROM Type WHERE name == '%s'";
-        query = String.format(query, name);
-        PreparedStatement ps = con.prepareStatement(query);
-        ResultSet rs = ps.executeQuery();
-        return rs.getInt(1);
+        try {
+            String query = "SELECT ID FROM Type WHERE type = '%s'";
+            query = String.format(query, name);
+            PreparedStatement ps = con.prepareStatement(query);
+            ResultSet rs = ps.executeQuery();
+            rs.next();
+            return rs.getInt(1);
+        } catch (SQLException e)
+        {
+    //        System.out.println(e.getMessage());
+            return -1;
+        }
     }
 }
