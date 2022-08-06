@@ -1,10 +1,11 @@
 import java.util.Scanner;
 
 public class App {
+    static Scanner scan;
     public static void main(String[] args){
         MySQLObj sqlObj = MySQLObj.getInstance();
 
-        Scanner scan = new Scanner(System.in);
+        scan = new Scanner(System.in);
         User user = null;
         boolean exit = false;
         while(!exit && user == null){
