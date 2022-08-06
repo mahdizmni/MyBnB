@@ -191,11 +191,11 @@ CREATE TABLE Has (
 );
 
 CREATE TABLE LocatedIn (
-    Address_postalcode VARCHAR(12),
+    Address_ID INT,
     Listing_ID INT,
     PRIMARY KEY(Listing_ID),
 
-    FOREIGN KEY (Address_postalcode) REFERENCES Address(postalcode)
+    FOREIGN KEY (Address_ID) REFERENCES Address(ID)
         ON DELETE CASCADE
         ON UPDATE CASCADE,
 

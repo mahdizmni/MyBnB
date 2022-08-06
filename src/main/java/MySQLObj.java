@@ -76,7 +76,7 @@ public class MySQLObj {
         String query = """
                 SELECT DISTINCT ai.Listing_ID, postalcode, num, street, AVG(price) FROM AvailableIn AS ai
                 JOIN LocatedIn AS li ON ai.Listing_ID = li.Listing_ID
-                JOIN Address AS a ON li.Address_postalcode = a.postalcode
+                JOIN Address AS a ON li.Address_ID = a.ID
                 GROUP BY ai.Listing_ID, postalcode, num, street
                 ORDER BY ai.Listing_ID;
                 """;
@@ -87,7 +87,7 @@ public class MySQLObj {
         String query = """
                 SELECT DISTINCT Period_ID, ai.Listing_ID, postalcode, num, street, price, p.start, p.end FROM AvailableIn AS ai
                 JOIN LocatedIn AS li ON ai.Listing_ID = li.Listing_ID
-                JOIN Address AS a ON li.Address_postalcode = a.postalcode
+                JOIN Address AS a ON li.Address_ID = a.ID
                 JOIN Period AS p ON p.ID = ai.Period_ID
                 WHERE ai.Listing_ID = ?;
                 """;
@@ -100,7 +100,7 @@ public class MySQLObj {
         String query = """
                 SELECT p.* FROM AvailableIn AS ai
                 JOIN LocatedIn AS li ON ai.Listing_ID = li.Listing_ID
-                JOIN Address AS a ON li.Address_postalcode = a.postalcode
+                JOIN Address AS a ON li.Address_ID = a.ID
                 JOIN Period AS p ON p.ID = ai.Period_ID
                 WHERE ai.Listing_ID = ?
                 AND (DATE(?) BETWEEN p.start AND p.end)
@@ -125,7 +125,7 @@ public class MySQLObj {
         String query = """
                 SELECT DISTINCT ai.Listing_ID, postalcode, street FROM AvailableIn AS ai
                 JOIN LocatedIn AS li ON ai.Listing_ID = li.Listing_ID
-                JOIN Address AS a ON li.Address_postalcode = a.postalcode
+                JOIN Address AS a ON li.Address_ID = a.ID
                 ORDER BY ai.Listing_ID;
                 """;
         PreparedStatement preparedQuery = con.prepareStatement(query);
