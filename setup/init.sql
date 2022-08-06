@@ -27,12 +27,12 @@ CREATE TABLE Listings (
 );
 
 CREATE TABLE ListingsType (
-    ID INT AUTO_INCREMENT,
+    Listings_ID INT,
     type_ID INT,            -- putting constraint for options in sql or code?
 
-    PRIMARY KEY(ID, type_ID),
+    PRIMARY KEY(Listings_ID, type_ID),
 
-    FOREIGN KEY(ID) REFERENCES Listings(ID)
+    FOREIGN KEY(Listings_ID) REFERENCES Listings(ID)
         ON DELETE CASCADE
         ON UPDATE CASCADE,
     FOREIGN KEY(type_ID) REFERENCES Type(ID)
@@ -128,17 +128,21 @@ CREATE TABLE Country (
 );
 
 CREATE TABLE Address (
+    ID INT AUTO_INCREMENT,
     postalcode Varchar(12), 
     street Text,
-    PRIMARY KEY(postalcode)
+    num INT,
+    
+    UNIQUE (postalcode, num),
+    PRIMARY KEY(ID)
 );
 
 CREATE TABLE ResidesIn (
-    Address_postalcode varchar(12),
+    Address_ID INT,
     User_SIN INT,
     PRIMARY KEY(User_SIN),
 
-    FOREIGN KEY (Address_postalcode) REFERENCES Address(postalcode)
+    FOREIGN KEY (Address_ID) REFERENCES Address(ID)
         ON DELETE CASCADE
         ON UPDATE CASCADE,
     FOREIGN KEY (User_SIN) REFERENCES User(SIN)
@@ -159,12 +163,12 @@ CREATE TABLE BelongsTo (
         ON UPDATE CASCADE
 );
 
-CREATE TABLE IsIn (
-    Address_postalcode VARCHAR(12), 
+CREATE TABLE IsIn (                 
+    Address_ID INT, 
     City_ID INT,
-    PRIMARY KEY(Address_postalcode, City_ID),
+    PRIMARY KEY(Address_ID, City_ID),
 
-    FOREIGN KEY (Address_postalcode) REFERENCES Address(postalcode)
+    FOREIGN KEY (Address_ID) REFERENCES Address(ID)
         ON DELETE CASCADE
         ON UPDATE CASCADE,
 
@@ -231,7 +235,7 @@ CREATE TABLE Owns (
 );
 
 CREATE TABLE Books (
-    BookingID INT AUTO_INCREMENT,      -- just in case, but may not be neccesarily
+    BookingID INT AUTO_INCREMENT,      -- just in case, but may not be necessary
     Renter_SIN INT,
     Listing_ID INT,
     start DATE NOT NULL,
