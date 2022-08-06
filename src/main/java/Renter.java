@@ -7,7 +7,6 @@ public class Renter extends User{
     }
 
     public void mainLoop(){
-        Scanner scan = new Scanner(System.in);
         boolean exit = false;
         while(!exit){
             Utils.printMenu(this.firstname + "'s Menu (Renter)",
@@ -16,7 +15,7 @@ public class Renter extends User{
                             "Cancel a booking",
                             "Get history of past hosts",
                             "Comment on past hosts"});
-            String userInput = scan.nextLine();
+            String userInput = App.scan.nextLine();
             switch (userInput) {
                 case "1"-> bookListing();
                 case "2"-> cancelBooking();

@@ -3,7 +3,7 @@ import java.sql.*;
 public class MySQLObj {
     private final String uriDb = "jdbc:mysql://localhost:3306/MyBnB";
     private final String username = "root";
-    private final String password = "";
+    private final String password = "Mz2468!0";
     private static Connection con;
     private static Statement st;
     private static MySQLObj instance = null;
@@ -73,4 +73,42 @@ public class MySQLObj {
         return st.executeQuery(query);
     }
 
+    public static void addToListings(double latitude, double longitude) throws SQLException {
+        String query = "INSERT INTO Listings(latitude, longitude) VALUES (%f, %f)";
+        query = String.format(query, latitude, longitude);
+        PreparedStatement ps = con.prepareStatement(query);
+        ResultSet rs = ps.executeQuery();
+    }
+
+    public static Integer getRecentID() throws SQLException {
+        String query = "SELECT LAST_INSERT_ID()";
+        PreparedStatement ps = con.prepareStatement(query);
+        ResultSet rs = ps.executeQuery();
+        return rs.getInt(1);
+    }
+
+    public static void addToCountry(String country) throws SQLException {
+        String query = "INSERT INTO Country (name) VALUES ('%s')";
+        query = String.format(query, country);
+        PreparedStatement ps = con.prepareStatement(query);
+        ResultSet rs = ps.executeQuery();
+    }
+    public static void addToCity(String city) throws SQLException {
+        String query = "INSERT INTO City (name) VALUES ('%s')";
+        query = String.format(query, city);
+        PreparedStatement ps = con.prepareStatement(query);
+        ResultSet rs = ps.executeQuery();
+    }
+    public static void addToAddress(String postalcode, String street, int num) throws SQLException {
+        String query = "INSERT INTO Address VALUES ('%s', '%s', %d)";
+        query = String.format(query, postalcode, street, num);
+        PreparedStatement ps = con.prepareStatement(query);
+        ResultSet rs = ps.executeQuery();
+    }
+    public static void addToType(String type) throws SQLException {
+        String query = "INSERT INTO Type (type) VALUES ('%s')";
+        query = String.format(query, type);
+        PreparedStatement ps = con.prepareStatement(query);
+        ResultSet rs = ps.executeQuery();
+    }
 }
