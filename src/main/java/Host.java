@@ -36,105 +36,122 @@ public class Host extends User{
     }
 
     public void createListing() throws SQLException {
+        Scanner input = new Scanner(System.in);
         System.out.println("create a listing");
+
         double lat, lon;
         String amenities, type;
-        int start, end, num, address_id, city_id, country_id, type_id, listing_id;
+        int start, end, num, address_id = 0, city_id = 0, country_id, type_id,
+                listing_id, amenities_id = 0, period_id, price;
         String city, country, postalcode, street, buff;
-        boolean[] boolarr = new boolean[3];
+        boolean addtoaddress, addtocity, addtocountry;
+        addtoaddress = false; addtocity = false; addtocountry = false;
 
         System.out.println("please insert the postalcode with space");
-        postalcode = App.scan.nextLine();
+        postalcode = input.nextLine();
         System.out.println("please insert num");
-        num = App.scan.nextInt();
+        num = Integer.parseInt(input.nextLine());
         System.out.println("please insert the street");
-        street = App.scan.nextLine();
+        street = input.nextLine();
         System.out.println("please insert the city");
-        city = App.scan.nextLine();
+        city = input.nextLine();
         System.out.println("please insert the country");
-        country = App.scan.nextLine();
+        country = input.nextLine();
         System.out.println("please insert the lat");
-        lat = App.scan.nextDouble();
+        lat = Double.parseDouble(input.nextLine());
         System.out.println("please insert the lon");
-        lon = App.scan.nextDouble();
+        lon = Double.parseDouble(input.nextLine());
         System.out.println("please insert the type of your listing (print the options?)");
-        type = App.scan.nextLine();
+        type = input.nextLine();
 
         // check if a listing already exists
         // TA:  more efficient
-        try {
-            MySQLObj.addToAddress(postalcode, street, num);
-            address_id = MySQLObj.getRecentID();
-        } catch (SQLException e) {
-            boolarr[0] = true;
-        }
+        if (MySQLObj.addToAddress(postalcode, street, num)) {
+            address_id = MySQLObj.getRecentID(); }
+        else { addtoaddress = true;}
 
-        try {
-            MySQLObj.addToCity(city);
-            city_id = MySQLObj.getRecentID();
-        } catch (SQLException e) {
-            boolarr[1] = true;
-        }
+        if (MySQLObj.addToCity(city)) {
+            city_id = MySQLObj.getRecentID(); }
+        else { addtocity = true;}
 
-        try {
-            MySQLObj.addToCountry(country);
-            country_id = MySQLObj.getRecentID();
-        } catch (SQLException e) {
-            boolarr[2] = true;
-        }
+        if (MySQLObj.addToCountry(country)) {
+            country_id = MySQLObj.getRecentID(); }
+        else { addtocountry = true;}
 
-        if (boolarr[0] && boolarr[1] && boolarr[3]) {
+        if (addtoaddress && addtocity && addtocountry) {
             System.out.println("listing already exists! plz try again");
             return;
         }
 
-        if (boolarr[0])
+        if (addtoaddress)
             address_id = MySQLObj.getAddressID(postalcode, num);
-        if (boolarr[1])
+        if (addtocity)
             city_id = MySQLObj.getCityID(city);
-        if (boolarr[2])
+        if (addtocountry)
             country_id = MySQLObj.getCountryID(country);
 
-
-        MySQLObj.addToType(type);
-        type_id = MySQLObj.getRecentID();
+        if (MySQLObj.addToType(type))
+            type_id = MySQLObj.getRecentID();
+        else
+            type_id = MySQLObj.getTypeID(type);
 
         MySQLObj.addToListings(lat, lon);
         listing_id = MySQLObj.getRecentID();
 
         // Linking corresponding tables
         MySQLObj.addToListingsType(listing_id, type_id);
-
-
-
+        MySQLObj.addToBelongsTo(city, country);
+        MySQLObj.addToLocatedIn(address_id, listing_id);
+        MySQLObj.addToIsIn(address_id, city_id);
 
 
         System.out.println("please insert one amenity at a time. press q to finish");
         boolean stop = false;
         while (!stop) {
-            amenities = App.scan.nextLine();
+            amenities = input.nextLine();
             if (!amenities.equals("q")) {
                 // insert to tables
+                try {
+                    MySQLObj.addToAmenities(amenities);
+                    amenities_id = MySQLObj.getRecentID();
+                } catch (SQLException e) {
+                    address_id = MySQLObj.getAmenitiesID(amenities);
+                }
+                MySQLObj.addToHas(amenities_id, listing_id);
             } else {
                 stop = true;
             }
         }
 
-        System.out.println("please insert the available periods of your listing");
+        System.out.println("please insert the available periods and price of your listing one at a time. press q to finish");
         stop = false;
         while (!stop) {
-            System.out.println("start date(e.g 20220907):");
-            start = App.scan.nextInt();
-            System.out.println("end date(e.g 20220907):");
-            end = App.scan.nextInt();
-            System.out.println("press y to add more periods, q to finish");
-            buff = App.scan.nextLine();
+            System.out.println("press y to add a period, q to finish");
+            buff = input.nextLine();
             if (!buff.equals("q")) {
-                stop = true;
-            } else {
+                System.out.println("start date(e.g 20220907):");
+                start = input.nextInt();
+                System.out.println("end date(e.g 20220907):");
+                end = input.nextInt();
+                System.out.println("price:");
+                price = input.nextInt();
                 // add these to table
+                period_id = MySQLObj.getPeriodID(start, end);
+                if ( period_id == -1) {
+                    MySQLObj.addToPeriod(start, end);
+                    period_id = MySQLObj.getRecentID();
+                }
+                try {
+                    MySQLObj.addToAvailableIn(listing_id, period_id, price);
+                } catch (SQLException e) {
+                    System.out.println("already added!");
+                }
+            } else {
+                stop = true;
             }
+
         }
+
     }
 
     public void cancelBooking(){
