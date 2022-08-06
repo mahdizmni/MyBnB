@@ -30,7 +30,7 @@ CREATE TABLE ListingsType (
     Listings_ID INT,
     type_ID INT,            -- putting constraint for options in sql or code?
 
-    PRIMARY KEY(ID, type_ID),
+    PRIMARY KEY(Listings_ID, type_ID),
 
     FOREIGN KEY(Listings_ID) REFERENCES Listings(ID)
         ON DELETE CASCADE
