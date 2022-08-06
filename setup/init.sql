@@ -27,7 +27,7 @@ CREATE TABLE Listings (
 );
 
 CREATE TABLE ListingsType (
-    ID INT AUTO_INCREMENT,
+    Listings_ID INT,
     type_ID INT,            -- putting constraint for options in sql or code?
 
     PRIMARY KEY(ID, type_ID),
