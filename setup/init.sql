@@ -128,21 +128,17 @@ CREATE TABLE Country (
 );
 
 CREATE TABLE Address (
-    ID INT,
     postalcode Varchar(12), 
     street Text,
-    num INT,
-    
-    UNIQUE (postalcode, num),
-    PRIMARY KEY(ID)
+    PRIMARY KEY(postalcode)
 );
 
 CREATE TABLE ResidesIn (
-    Address_ID INT,
+    Address_postalcode varchar(12),
     User_SIN INT,
     PRIMARY KEY(User_SIN),
 
-    FOREIGN KEY (Address_ID) REFERENCES Address(ID)
+    FOREIGN KEY (Address_postalcode) REFERENCES Address(postalcode)
         ON DELETE CASCADE
         ON UPDATE CASCADE,
     FOREIGN KEY (User_SIN) REFERENCES User(SIN)
@@ -163,12 +159,12 @@ CREATE TABLE BelongsTo (
         ON UPDATE CASCADE
 );
 
-CREATE TABLE IsIn (                 
-    Address_ID INT, 
+CREATE TABLE IsIn (
+    Address_postalcode VARCHAR(12), 
     City_ID INT,
-    PRIMARY KEY(Address_ID, City_ID),
+    PRIMARY KEY(Address_postalcode, City_ID),
 
-    FOREIGN KEY (Address_ID) REFERENCES Address(ID)
+    FOREIGN KEY (Address_postalcode) REFERENCES Address(postalcode)
         ON DELETE CASCADE
         ON UPDATE CASCADE,
 
