@@ -96,14 +96,14 @@ public class Renter extends User{
             Utils.printInfo("Listing ID does not exist!");
             return;
         }
-
-        System.out.println("Start date of stay. (Please make sure this date is between (inclusive) the available period of the listing");
+        System.out.println("Please make sure the follow dates entered are between (inclusive) the available period of the listing");
+        System.out.print("Please enter your start date of stay: ");
         String userStartDateString = scan.next();
-        System.out.println("End date of stay. (Please make sure this date is between (inclusive) the available period of the listing");
+        System.out.print("Please enter your end date of stay: ");
         String userEndDateString = scan.next();
 
-        ResultSet apse;
-        if ((apse = MySQLObj.getAvailablePeriodFromStartEnd(userListingID, userStartDateString, userEndDateString)) == null){
+        ResultSet apse = MySQLObj.getAvailablePeriodFromStartEnd(userListingID, userStartDateString, userEndDateString);
+        if (!apse.next()){
             Utils.printInfo("Start or end date is not valid.");
             return;
         }
@@ -140,6 +140,7 @@ public class Renter extends User{
             return;
         }
         // this line should not be reached
+        Utils.printInfo("this line should not be reached!");
     }
 
     public void cancelBooking(){
