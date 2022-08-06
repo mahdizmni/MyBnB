@@ -1,8 +1,9 @@
+import java.sql.SQLException;
 import java.util.Scanner;
 
 public class App {
     static Scanner scan;
-    public static void main(String[] args){
+    public static void main(String[] args) throws SQLException {
         MySQLObj sqlObj = MySQLObj.getInstance();
 
         scan = new Scanner(System.in);
