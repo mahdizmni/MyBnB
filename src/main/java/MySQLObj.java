@@ -1,5 +1,8 @@
 import java.sql.*;
+import java.text.ParseException;
 import java.util.ArrayList;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class MySQLObj {
     private final String uriDb = "jdbc:mysql://localhost:3306/MyBnB";
@@ -363,6 +366,45 @@ public class MySQLObj {
             Utils.printError("Something went wrong!", e.getMessage());
         }
     }
+    public static ResultSet AllListingsWithPrice(int host_sin, int listing_id) {
+        ResultSet rs = null;
+        try {
+            String query = """
+                    SELECT AvailableIn.Period_ID, Listings.ID, Period.start, Period.end, AvailableIn.price 
+                    FROM AvailableIn JOIN Period ON Period.ID = AvailableIn.Period_ID 
+                        JOIN Listings ON Listings.ID = AvailableIn.Listing_ID
+                    WHERE Listings.ID = ? AND Listings.ID IN (SELECT Listing_ID FROM Owns
+                                                                WHERE Host_SIN = ?)
+                    """;
+            PreparedStatement ps = con.prepareStatement(query);
+            ps.setInt(1, listing_id);
+            ps.setInt(2, host_sin);
+            rs = ps.executeQuery();
+
+            return rs;
+        } catch (SQLException e) {
+            return rs;
+        }
+    }
+    public static void ViewAllListingsWithPrice(int host_sin, int listing_id) {
+        ArrayList<ArrayList<Object>> listingsList = new ArrayList<>();
+        ResultSet listings = null;
+        try{
+            listings = AllListingsWithPrice(host_sin, listing_id);
+            while (listings.next()) {
+                ArrayList<Object> listingData = new ArrayList<Object>();
+                listingData.add(listings.getInt("Period_ID"));
+                listingData.add(listings.getInt("start"));
+                listingData.add(listings.getInt("end"));
+                listingData.add(listings.getInt("price"));
+                listingsList.add(listingData);
+            }
+            Utils.printTable(new String[]{"ID, start date, end date, price"},listingsList);
+        }
+        catch (Exception e){
+            Utils.printError("Something went wrong!", e.getMessage());
+        }
+    }
     public static ResultSet AllBookedListings(int host_sin) {
         ResultSet rs = null;
         try {
@@ -381,18 +423,52 @@ public class MySQLObj {
             return rs;
         }
     }
-    public static boolean CancelBookedListing(int booking_id, int host_sin) {
+    public static int PeriodIDToListingID(int period_id) {
+        try {
+            String query = """
+                    SELECT Listing_ID FROM AvailableIn 
+                    WHERE Period_ID = ?;
+                    """;
+            PreparedStatement ps = con.prepareStatement(query);
+            ps.setInt(1, period_id);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next())
+                return rs.getInt(1);
+            else
+                return -1;
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+            return -1;
+        }
+    }
+    public static int BookingIDToListingID(int booking_id) {
+        try {
+            String query = """
+                    SELECT Listing_ID FROM Books
+                    WHERE BookingID = ?;
+                    """;
+            PreparedStatement ps = con.prepareStatement(query);
+            ps.setInt(1, booking_id);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next())
+                return rs.getInt(1);
+            else
+                return -1;
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+            return -1;
+        }
+    }
+    public static boolean CancelBookedListing(int booking_id) {
         try {
             String query = """
                     UPDATE Books
                     set isReserved = False || isReserved
-                    WHERE BookingID = ? AND Listing_ID IN (SELECT Owns.Listing_ID
-                                                            WHERE Owns.Host_SIN = ?);
+                    WHERE BookingID = ?;
                     """;
             PreparedStatement ps = con.prepareStatement(query);
             ps.setInt(1, booking_id);
-            ps.setInt(2, host_sin);
-            ResultSet rs = ps.executeQuery();
+            ps.executeUpdate();
             return true;
         } catch (SQLException e) {
             return false;
@@ -417,56 +493,170 @@ public class MySQLObj {
             Utils.printError("Something went wrong!", e.getMessage());
         }
     }
-    public static boolean RemoveListing(int listing_id, int host_sin) {
+    public static boolean RemoveListing(int listing_id) {
         try {
             String query = """
                     DELETE FROM Listings
-                    WHERE Listings.ID = ? AND Listings.ID IN (SELECT Owns.Listing_ID 
-                                                    WHERE Owns.Host_SIN = ?);
+                    WHERE Listings.ID = ?;
+                    """;
+            PreparedStatement ps = con.prepareStatement(query);
+            ps.setInt(1, listing_id);
+            ResultSet rs = ps.executeQuery();
+            return true;
+        } catch (SQLException e) {
+            return false;
+        }
+    }
+    public static boolean isReserved (int booking_id) {
+        try {
+            String query = """
+                    SELECT isReserved FROM Books
+                    WHERE BookingID = ?;
+                    """;
+            PreparedStatement ps = con.prepareStatement(query);
+            ps.setInt(1, booking_id);
+            ResultSet rs = ps.executeQuery();
+            rs.next();
+            return rs.getBoolean(1);
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+            return false;
+        }
+    }
+    public static boolean OwnsListing(int listing_id, int host_sin) {
+        try {
+            String query = """
+                    SELECT ID FROM Listings
+                    WHERE ID = ? AND ID IN (SELECT Listing_ID FROM Owns
+                                            WHERE Host_SIN = ?);
                     """;
             PreparedStatement ps = con.prepareStatement(query);
             ps.setInt(1, listing_id);
             ps.setInt(2, host_sin);
             ResultSet rs = ps.executeQuery();
-            return true;
+            if (rs.next())
+                return true;
+            else
+                return false;
         } catch (SQLException e) {
+            System.out.println(e.getMessage());
             return false;
         }
     }
-    public static boolean UpdateAvailability(int listing_id, int period_id, int host_sin) {
+    public static boolean ValidateListingID(int listing_id) {
         try {
             String query = """
-                    UPDATE AvailableIn 
-                    set Period_ID = ? || Period_ID 
-                    WHERE Listing_ID = ? AND Listing_ID IN (SELECT Owns.Listing_ID
-                                                            WHERE Owns.Host_SIN = ?);
+                    SELECT ID FROM Listings
+                    WHERE ID = ?;
                     """;
             PreparedStatement ps = con.prepareStatement(query);
-            ps.setInt(1, period_id);
-            ps.setInt(2, listing_id);
-            ps.setInt(3, host_sin);
+            ps.setInt(1, listing_id);
             ResultSet rs = ps.executeQuery();
-            return true;
+            if (rs.next())
+                return true;
+            else
+                return false;
         } catch (SQLException e) {
+            System.out.println(e.getMessage());
             return false;
         }
     }
-    public static boolean UpdatePrice(int listing_id, int price, int host_sin) {
+    public static boolean IsWithinDate(Date Oend, Date start) {
+        return start.before(Oend);
+    }
+    public static String GetEndDate (int period_ID) {
         try {
             String query = """
-                    UPDATE AvailableIn 
-                    set price = ? || price 
-                    WHERE Listing_ID = ? AND Listing_ID IN (SELECT Owns.Listing_ID
-                                                            WHERE Owns.Host_SIN = ?);
+                    SELECT end FROM Period 
+                    WHERE ID = ?;
+                    """;
+            PreparedStatement ps = con.prepareStatement(query);
+            ps.setInt(1, period_ID);
+            ResultSet rs = ps.executeQuery();
+            rs.next();
+            return rs.getString(1);
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+            return "not found";
+        }
+    }
+    public static String GetStartDateFromBooks (int listing_id) {
+        try {
+            String query = """
+                    SELECT start FROM Books 
+                    WHERE Listing_ID = ?;
+                    """;
+            PreparedStatement ps = con.prepareStatement(query);
+            ps.setInt(1, listing_id);
+            ResultSet rs = ps.executeQuery();
+            rs.next();
+            return rs.getString(1);
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+            return "not found";
+        }
+    }
+    public static boolean UpdatePrice (int listing_id, int period_id, int price) {
+        try {
+            String query = """
+                    UPDATE AvailableIn
+                    SET price = ? || price
+                    WHERE Listing_ID = ? AND Period_IC = ?;
                     """;
             PreparedStatement ps = con.prepareStatement(query);
             ps.setInt(1, price);
             ps.setInt(2, listing_id);
-            ps.setInt(3, host_sin);
-            ResultSet rs = ps.executeQuery();
+            ps.setInt(3, period_id);
+            ps.executeUpdate();
             return true;
         } catch (SQLException e) {
+            System.out.println(e.getMessage());
             return false;
+        }
+    }
+    public static int BookedWithinAvailability(int listing_id, int period_id) throws SQLException, ParseException {
+        ResultSet listings = WithinAvailability(listing_id, period_id);
+        if (listings == null)
+            return 0;
+        ArrayList<ArrayList<Object>> listingsList = new ArrayList<>();
+        while (listings.next()) {
+            ArrayList<Object> listingData = new ArrayList<Object>();
+            listingData.add(listings.getString("end"));
+            listingData.add(listings.getString("start"));
+            listingsList.add(listingData);
+        }
+
+        if (listingsList.size() == 0) { // no one has even attempted to book a place. free to update
+           return 0;
+       }
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        for (int i = 0; i < listingsList.size(); i++) {
+           Date start = sdf.parse((String) listingsList.get(i).get(1));
+           Date end = sdf.parse((String) listingsList.get(i).get(0));
+           if (IsWithinDate(end, start))
+                return -1;
+        }
+
+        return 0;
+    }
+public static ResultSet WithinAvailability(int listing_id, int period_id) {
+        ResultSet rs = null;
+        try {
+            String query = """
+                    SELECT p.end, b.start FROM
+                    Book AS b JOIN AvailableIn ON b.Listing_ID = AvailableIn.Listing_ID
+                    JOIN Period AS p ON p.ID = AvailableIn.Period_ID
+                    WHERE b.Listing_ID = ? AND p.ID = ? AND b.isReserved = True;
+                    """;
+            PreparedStatement ps = con.prepareStatement(query);
+            ps.setInt(1, listing_id);
+            ps.setInt(2, period_id);
+            rs = ps.executeQuery();
+            rs.next();
+            return rs;
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+            return rs;
         }
     }
 }

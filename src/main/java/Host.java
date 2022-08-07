@@ -1,7 +1,9 @@
 import javax.security.sasl.SaslServer;
 import java.sql.SQLException;
+import java.text.ParseException;
 import java.util.Scanner;
-
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class Host extends User{
     public Host(User u) {
@@ -9,7 +11,7 @@ public class Host extends User{
         this.setEmail(u.getEmail());
     }
 
-    public void mainLoop() throws SQLException {
+    public void mainLoop() throws SQLException, ParseException {
         Scanner scan = new Scanner(System.in);
         boolean exit = false;
         while(!exit){
@@ -164,8 +166,21 @@ public class Host extends User{
         MySQLObj.ViewAllBookedListings(getSin());
         System.out.println("enter a booking id to cancel");
         int booking_id = Integer.parseInt(input.nextLine());
-        if (!MySQLObj.CancelBookedListing(booking_id, getSin()))
+        int listing_id = MySQLObj.BookingIDToListingID(booking_id);
+        if (listing_id == -1) {
             System.out.println("invalid booking id");
+            return;
+        }
+        if (!MySQLObj.OwnsListing(listing_id, getSin())) {
+            System.out.println("you dont own this listing!");
+            return;
+        }
+        if (!MySQLObj.isReserved(booking_id)) {
+            System.out.println("has not been reserved");
+            return;
+        }
+        if (MySQLObj.CancelBookedListing(booking_id))
+            System.out.println("success");
     }
 
     public void removeListing(){
@@ -175,42 +190,122 @@ public class Host extends User{
         MySQLObj.ViewAllHostListings(getSin());
         System.out.println("enter a listing id");
         int listing_id = Integer.parseInt(input.nextLine());
-        if (!MySQLObj.RemoveListing(listing_id, getSin()))
+
+        if (!MySQLObj.ValidateListingID(listing_id)) {
             System.out.println("invalid listing id");
+            return;
+        }
+
+        if (!MySQLObj.OwnsListing(listing_id, getSin())) {
+            System.out.println("you dont own this listing!");
+            return;
+        }
+
+        if (MySQLObj.RemoveListing(listing_id))
+            System.out.println("success");
     }
 
-    public void updatePrice(){
+    public void updatePrice() throws ParseException, SQLException {
         Scanner input = new Scanner(System.in);
         System.out.println("Update Price");
         System.out.println("All listings");
         MySQLObj.ViewAllHostListings(getSin());
         System.out.println("enter a listing id");
         int listing_id = Integer.parseInt(input.nextLine());
-        System.out.println("enter price");          // TODO: valid price
-        int price = Integer.parseInt(input.nextLine());
-        if (!MySQLObj.UpdatePrice(listing_id, price, getSin()))
+
+        if (!MySQLObj.ValidateListingID(listing_id)) {
             System.out.println("invalid listing id");
+            return;
+        }
+
+        if (!MySQLObj.OwnsListing(listing_id, getSin())) {
+            System.out.println("you dont own this listing!");
+            return;
+        }
+
+        MySQLObj.ViewAllListingsWithPrice(getSin(), listing_id);
+
+        System.out.println("choose an ID");
+        int period_id = Integer.parseInt(input.nextLine());
+
+        listing_id = MySQLObj.PeriodIDToListingID(period_id);
+        if (listing_id == -1)  {
+            System.out.println("invalid id!");
+            return;
+        }
+
+        if (!MySQLObj.OwnsListing(listing_id, getSin())) {
+            System.out.println("you dont own this listing!");
+            return;
+        }
+
+        if (MySQLObj.BookedWithinAvailability(listing_id, period_id) == -1) {
+            System.out.println("already booked!");
+            return;
+        }
+
+        System.out.println("set a price");          // TODO: valid price
+        int price = Integer.parseInt(input.nextLine());
+
+        if (MySQLObj.UpdatePrice(listing_id, period_id, price))
+            System.out.println("success");
+
+
+        return;
     }
 
-    public void updateAvailability() throws SQLException {
-        System.out.println("Update Availability");
+    public void updateAvailability() throws SQLException, ParseException {
         Scanner input = new Scanner(System.in);
+        System.out.println("Update Availability");
         System.out.println("All listings");
         MySQLObj.ViewAllHostListings(getSin());
         System.out.println("enter a listing id");
         int listing_id = Integer.parseInt(input.nextLine());
-        System.out.println("enter start");
+
+        if (!MySQLObj.ValidateListingID(listing_id)) {
+            System.out.println("invalid listing id");
+            return;
+        }
+
+        if (!MySQLObj.OwnsListing(listing_id, getSin())) {
+            System.out.println("you dont own this listing!");
+            return;
+        }
+
+        MySQLObj.ViewAllListingsWithPrice(getSin(), listing_id);
+
+        System.out.println("choose an ID");
+        int period_id = Integer.parseInt(input.nextLine());
+
+        listing_id = MySQLObj.PeriodIDToListingID(period_id);
+        if (listing_id == -1)  {
+            System.out.println("invalid id!");
+            return;
+        }
+
+        if (!MySQLObj.OwnsListing(listing_id, getSin())) {
+            System.out.println("you dont own this listing!");
+            return;
+        }
+
+        if (MySQLObj.BookedWithinAvailability(listing_id, period_id) == -1) {
+            System.out.println("already booked!");
+            return;
+        }
+
+        System.out.println("start date(e.g 20220907):");
         int start = Integer.parseInt(input.nextLine());
-        System.out.println("enter end");
+        System.out.println("end date(e.g 20220907):");
         int end = Integer.parseInt(input.nextLine());
-        int period_id;
+
+        //TODO: check if new dates do not overlap with other available intervals for the same listing
         if (MySQLObj.addToPeriod(start, end))
             period_id = MySQLObj.getRecentID();
         else
             period_id = MySQLObj.getPeriodID(start ,end);
 
-        if (MySQLObj.UpdateAvailability(listing_id, period_id, getSin()))
-            System.out.println("success!");
+        return;
+
     }
 
     public void getHistory(){
