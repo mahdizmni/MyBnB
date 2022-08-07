@@ -1,5 +1,6 @@
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -108,6 +109,7 @@ public class Renter extends User{
             return;
         }
         int targetPeriodID = apse.getInt("ID");
+        double targetPeriodPrice = apse.getDouble("price");
         String targetStartDateString = apse.getString("start");
         String targetEndDateString = apse.getString("end");
 
@@ -119,24 +121,38 @@ public class Renter extends User{
 
         // check case 1
         if(targetStartDate.compareTo(userStartDate) == 0 && targetEndDate.compareTo(userEndDate) == 0){
-            // remove tuple in AvailableIn
-            // add tuple in Books of with new dates
+            // remove Period
+            MySQLObj.genericRemoveByID("Period", "ID", targetPeriodID);
+            // add tuple in Books with new dates
+            MySQLObj.createBooking(this.getSin(), userListingID, userStartDateString, userStartDateString);
             return;
         }
         // check case 2
         boolean b1 = targetStartDate.compareTo(userStartDate) == 0 && targetEndDate.compareTo(userEndDate) > 0;
         boolean b2 = targetStartDate.compareTo(userStartDate) < 0 && targetEndDate.compareTo(userEndDate) == 0;
         if(b1 || b2){
-            // edit AvailableIN Period to become less
-            // add tuple in Books of with new dates
+            // edit AvailableIn Period to become less
+            if (b1){
+                // available period is right skewed i.e. |--------------s=======e|
+                MySQLObj.editPeriod(targetPeriodID, sdf.format(Utils.addDays(userEndDate, 1)), targetEndDateString);
+            }
+            else {
+                // available period is left skewed i.e. |s=======e--------------|
+                MySQLObj.editPeriod(targetPeriodID, targetStartDateString, sdf.format(Utils.addDays(userStartDate, -1)));
+            }
+            // add tuple in Books with new dates
+            MySQLObj.createBooking(this.getSin(), userListingID, userStartDateString, userEndDateString);
             return;
         }
         // check case 3
         boolean b3 = targetStartDate.compareTo(userStartDate) < 0 && targetEndDate.compareTo(userEndDate) > 0;
         if(b3){
-            // edit 1st AvailableIN Period to become less
+            // edit 1st AvailableIn Period to become less
+            MySQLObj.editPeriod(targetPeriodID, targetStartDateString, sdf.format(Utils.addDays(userStartDate, -1)));
             // create 2nd AvailableIn Period with less dates
-            // add tuple in Books of with new dates
+            MySQLObj.createAvailablePeriod(userListingID, sdf.format(Utils.addDays(userEndDate, 1)), targetEndDateString, targetPeriodPrice);
+            // add tuple in Books with new dates
+            MySQLObj.createBooking(this.getSin(), userListingID, userStartDateString, userEndDateString);
             return;
         }
         // this line should not be reached

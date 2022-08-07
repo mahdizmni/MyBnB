@@ -1,6 +1,8 @@
 import dnl.utils.text.table.TextTable;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 
 public class Utils {
     public static String divider = "=============";
@@ -38,5 +40,13 @@ public class Utils {
         Object[][] objectArray = data.stream().map(u -> u.toArray(new Object[0])).toArray(Object[][]::new);
         TextTable tt = new TextTable(columnNames, objectArray);
         tt.printTable();
+    }
+
+    public static Date addDays(Date date, int days)
+    {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        cal.add(Calendar.DATE, days);
+        return cal.getTime();
     }
 }

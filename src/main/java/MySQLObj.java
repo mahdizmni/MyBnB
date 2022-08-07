@@ -98,7 +98,7 @@ public class MySQLObj {
 
     public static ResultSet getAvailablePeriodFromStartEnd(int listing_ID, String start, String end) throws SQLException {
         String query = """
-                SELECT p.* FROM AvailableIn AS ai
+                SELECT p.*, ai.price FROM AvailableIn AS ai
                 JOIN LocatedIn AS li ON ai.Listing_ID = li.Listing_ID
                 JOIN Address AS a ON li.Address_ID = a.ID
                 JOIN Period AS p ON p.ID = ai.Period_ID
@@ -121,15 +121,52 @@ public class MySQLObj {
         return st.executeQuery(String.format(query, table, field, ID)).next();
     }
 
-    public static ResultSet createBooking(int listing_ID, int renter_sin, String start, String end) throws SQLException {
+    public static void genericRemoveByID(String table, String field, int ID) throws SQLException {
         String query = """
-                SELECT DISTINCT ai.Listing_ID, postalcode, street FROM AvailableIn AS ai
-                JOIN LocatedIn AS li ON ai.Listing_ID = li.Listing_ID
-                JOIN Address AS a ON li.Address_ID = a.ID
-                ORDER BY ai.Listing_ID;
+                DELETE FROM %s
+                WHERE %s = %d
                 """;
-        PreparedStatement preparedQuery = con.prepareStatement(query);
-        return preparedQuery.executeQuery();
+        st.executeUpdate(String.format(query, table, field, ID));
     }
 
+    public static void createBooking(int renter_sin, int listing_ID, String start, String end) throws SQLException {
+        String query = """
+                INSERT INTO Books (Renter_SIN, Listing_ID, start, end, isReserved)
+                VALUES (?, ?, ?, ?, true);
+                """;
+        PreparedStatement preparedQuery = con.prepareStatement(query);
+        preparedQuery.setInt(1, renter_sin);
+        preparedQuery.setInt(2, listing_ID);
+        preparedQuery.setString(3, start);
+        preparedQuery.setString(4, end);
+        preparedQuery.executeUpdate();
+    }
+
+    public static void editPeriod(int ID, String start, String end) throws SQLException {
+        String query = """
+                UPDATE Period
+                SET
+                    start = ?,
+                    end = ?
+                WHERE ID = ?
+                """;
+        PreparedStatement preparedQuery = con.prepareStatement(query);
+        preparedQuery.setString(1, start);
+        preparedQuery.setString(2, end);
+        preparedQuery.setInt(3, ID);
+        preparedQuery.executeUpdate();
+    }
+
+    public static void createAvailablePeriod(int Listing_ID, String start, String end, double price) throws SQLException {
+        String query1 = "INSERT INTO Period (start, end) VALUES (?, ?);";
+        String query2 = "INSERT INTO AvailableIn (Listing_ID, Period_ID, price) VALUES (?, LAST_INSERT_ID(), ?);";
+        PreparedStatement preparedQuery1 = con.prepareStatement(query1);
+        preparedQuery1.setString(1, start);
+        preparedQuery1.setString(2, end);
+        preparedQuery1.executeUpdate();
+        PreparedStatement preparedQuery2 = con.prepareStatement(query2);
+        preparedQuery2.setInt(1, Listing_ID);
+        preparedQuery2.setDouble(2, price);
+        preparedQuery2.executeUpdate();
+    }
 }
