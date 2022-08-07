@@ -63,8 +63,27 @@ public class Utils {
         return sdf.format(date);
     }
 
+    public static Date formatStringToDate(String dateString)
+    {
+        try{
+            SimpleDateFormat sdf = new SimpleDateFormat(sdfPattern);
+            return sdf.parse(dateString);
+        }catch (Exception e){
+            return null;
+        }
+    }
+
     public static String getTodayString(){
         return formatDateToString(getToday());
+    }
+
+    public static String repeatString(String s, int num){
+        StringBuilder newString = new StringBuilder();
+        for (int i = 0; i < num - 1; i++){
+            newString.append(s).append(", ");
+        }
+        newString.append(s);
+        return newString.toString();
     }
 
     public static String formatAddress(Object [] addressInfo){

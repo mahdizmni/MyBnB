@@ -13,6 +13,7 @@ public class Search {
 
     public Search() {
         amenitiesList = new ArrayList<>();
+        // default days are today and today + 30 days
         String defaultStartDate = Utils.formatDateToString(Utils.getToday());
         String defaultEndDate = Utils.formatDateToString(Utils.addDays(Utils.getToday(), 30));
         dateRange = new String[]{defaultStartDate, defaultEndDate};
@@ -56,22 +57,71 @@ public class Search {
 
     public void setDistanceOption(){
         Scanner scan = new Scanner(System.in);
-        System.out.format("Please enter a valid distance (current distance = %s): ", this.distance);
+        System.out.print("Please enter a valid distance: ");
         this.distance = scan.nextInt();
         System.out.println("");
         Utils.printInfo("Successfully updated distance option");
     }
+
     public void setPriceSortOption(){
-        System.out.println("Add price sort (ASC/DESC/NONE) option");
+        Scanner scan = new Scanner(System.in);
+        System.out.print("Please enter a valid price sort option (ASC/DESC/NONE): ");
+        String userPriceSort = scan.next();
+        if(userPriceSort.equals("ASC") || userPriceSort.equals("DESC") || userPriceSort.equals("NONE")){
+            System.out.println("");
+            this.priceSort = userPriceSort;
+            Utils.printInfo("Successfully updated price sort option.");
+            return;
+        }
+        System.out.println("");
+        Utils.printInfo("Please select a valid option.");
     }
+
     public void setPriceRangeOption(){
-        System.out.println("Add price range filter option");
+        Scanner scan = new Scanner(System.in);
+        System.out.print("Please enter the MIN price for the price range option: ");
+        double minPrice = scan.nextDouble();
+        System.out.print("Please enter the MAX price for the price range option: ");
+        double maxPrice = scan.nextDouble();
+        if (minPrice > maxPrice){
+            Utils.printInfo("Min price is greater than to max price. Please input a valid range.");
+            return;
+        }
+        this.priceRange[0] = minPrice;
+        this.priceRange[1] = maxPrice;
+        System.out.println("");
+        Utils.printInfo("Successfully updated price range option.");
     }
     public void setAmenitiesOption(){
-        System.out.println("Add amenities filter option");
+        amenitiesList.clear();
+        System.out.println("Please insert one amenity at a time. Press q to finish.");
+        boolean stop = false;
+        Scanner scan = new Scanner(System.in);
+        String amen;
+        while (!stop) {
+            amen = scan.nextLine();
+            if (!amen.equals("q")) {
+                amenitiesList.add(amen);
+            } else {
+                stop = true;
+            }
+        }
+        Utils.printInfo("Successfully updated amenities list option.");
     }
     public void setDataRangeOption(){
-        System.out.println("Add date range filter option");
+        Scanner scan = new Scanner(System.in);
+        System.out.print("Please enter the START date for the date range option: ");
+        String startDate = scan.next();
+        System.out.print("Please enter the END price for the date range option: ");
+        String endDate = scan.next();
+        if (Utils.formatStringToDate(startDate).compareTo(Utils.formatStringToDate(endDate)) > 0){
+            Utils.printInfo("Start date is after end date. Please input a valid range.");
+            return;
+        }
+        this.dateRange[0] = startDate;
+        this.dateRange[1] = endDate;
+        System.out.println("");
+        Utils.printInfo("Successfully updated date range option.");
     }
     public void viewAllFilterOptions(){
         System.out.println("Below are all the filter options: ");
