@@ -309,11 +309,29 @@ public class Host extends User{
     }
 
     public void getHistory(){
-        System.out.println("History");
+        System.out.println("no need");
     }
 
     public void comment(){
+        Scanner input = new Scanner(System.in);
         System.out.println("Comment on past renters");
+        // show all past renters with associated listing id
+        MySQLObj.ViewListingsHistory(getSin());
+        // choose a renter
+        System.out.println("insert a renter id");
+        int renter_sin = Integer.parseInt(input.nextLine());
+        // check if it's a valid renter (user sin)
+        if (!MySQLObj.ValidateUserID(renter_sin)) {
+            System.out.println("invalid User!");
+            return;
+        }
+        // check if has rented from this host before
+        if (!MySQLObj.MyRenter(renter_sin, getSin())) {
+            System.out.println("has not rented from you!");
+            return;
+        }
+        // insert comment
+
     }
 
     public void rate() {}

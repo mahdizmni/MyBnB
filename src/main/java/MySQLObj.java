@@ -405,6 +405,43 @@ public class MySQLObj {
             Utils.printError("Something went wrong!", e.getMessage());
         }
     }
+    public static void ViewListingsHistory(int host_sin) {
+        ArrayList<ArrayList<Object>> listingsList = new ArrayList<>();
+        ResultSet listings = null;
+        try{
+            listings = ListingsHistory(host_sin);
+            while (listings.next()) {
+                ArrayList<Object> listingData = new ArrayList<Object>();
+                listingData.add(listings.getInt("Listing_ID"));
+                listingData.add(listings.getInt("Renter_SIN"));
+                listingData.add(listings.getString("start"));
+                listingData.add(listings.getString("end"));
+                listingsList.add(listingData);
+            }
+            Utils.printTable(new String[]{"Listing ID, User ID, start of reservation, end of reservation"},listingsList);
+        }
+        catch (Exception e){
+            Utils.printError("Something went wrong!", e.getMessage());
+        }
+    }
+    public static ResultSet ListingsHistory(int host_sin) {
+        ResultSet rs = null;
+        try {
+            String query = """
+                    SELECT o.Listing_ID, b.Renter_SIN, o.start, o.end FROM
+                    Owns AS o JOIN Books AS b ON o.Listing_ID = b.Listing_ID 
+                    WHERE b.isReserved = True AND o.Listing_ID IN (SELECT Listing_ID FROM OWNS
+                                                                    WHERE Host_SIN = ?);
+                    """;
+            PreparedStatement ps = con.prepareStatement(query);
+            ps.setInt(1, host_sin);
+            rs = ps.executeQuery();
+
+            return rs;
+        } catch (SQLException e) {
+            return rs;
+        }
+    }
     public static ResultSet AllBookedListings(int host_sin) {
         ResultSet rs = null;
         try {
@@ -543,6 +580,27 @@ public class MySQLObj {
             return false;
         }
     }
+    public static boolean MyRenter(int renter_sin, int host_sin) {
+        try {
+            String query = """
+                    SELECT b.Renter_SIN FROM
+                    Books AS b JOIN Owns AS o ON b.Listing_ID = o.Listing_ID 
+                    WHERE b.Renter_SIN = ? AND b.Listing_ID IN (SELECT Listing_ID FROM OWNS
+                                                                    WHERE Host_SIN = ?)
+                    """;
+            PreparedStatement ps = con.prepareStatement(query);
+            ps.setInt(1, renter_sin);
+            ps.setInt(2, host_sin);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next())
+                return true;
+            else
+                return false;
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+            return false;
+        }
+    }
     public static boolean ValidateListingID(int listing_id) {
         try {
             String query = """
@@ -551,6 +609,24 @@ public class MySQLObj {
                     """;
             PreparedStatement ps = con.prepareStatement(query);
             ps.setInt(1, listing_id);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next())
+                return true;
+            else
+                return false;
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+            return false;
+        }
+    }
+    public static boolean ValidateUserID(int sin) {
+        try {
+            String query = """
+                    SELECT SIN FROM User
+                    WHERE SIN = ?; 
+                    """;
+            PreparedStatement ps = con.prepareStatement(query);
+            ps.setInt(1, sin);
             ResultSet rs = ps.executeQuery();
             if (rs.next())
                 return true;
@@ -639,7 +715,7 @@ public class MySQLObj {
 
         return 0;
     }
-public static ResultSet WithinAvailability(int listing_id, int period_id) {
+    public static ResultSet WithinAvailability(int listing_id, int period_id) {
         ResultSet rs = null;
         try {
             String query = """
@@ -659,4 +735,5 @@ public static ResultSet WithinAvailability(int listing_id, int period_id) {
             return rs;
         }
     }
+
 }
