@@ -169,4 +169,38 @@ public class MySQLObj {
         preparedQuery2.setDouble(2, price);
         preparedQuery2.executeUpdate();
     }
+
+    public static void cancelBooking(int ID, int renter_sin) throws SQLException {
+        String query = """
+                UPDATE Books
+                SET isReserved = false
+                WHERE BookingID = ? AND Renter_SIN = ?
+                """;
+        PreparedStatement preparedQuery = con.prepareStatement(query);
+        preparedQuery.setInt(1, ID);
+        preparedQuery.setInt(2, renter_sin);
+        preparedQuery.executeUpdate();
+    }
+
+    public static Boolean checkIfRenterCreatedBooking(int ID, int renter_sin) throws SQLException {
+        String query = """
+                SELECT * FROM Books
+                WHERE BookingID = ? AND Renter_SIN = ?
+                """;
+        PreparedStatement preparedQuery = con.prepareStatement(query);
+        preparedQuery.setInt(1, ID);
+        preparedQuery.setInt(2, renter_sin);
+        return preparedQuery.executeQuery().next();
+    }
+
+    public static Boolean checkIfBookingIsReserved(int ID, int renter_sin) throws SQLException {
+        String query = """
+                SELECT * FROM Books
+                WHERE BookingID = ? AND isReserved = 1 AND Renter_SIN = ?
+                """;
+        PreparedStatement preparedQuery = con.prepareStatement(query);
+        preparedQuery.setInt(1, ID);
+        preparedQuery.setInt(2, renter_sin);
+        return preparedQuery.executeQuery().next();
+    }
 }

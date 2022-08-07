@@ -1,6 +1,5 @@
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -162,8 +161,24 @@ public class Renter extends User{
         Utils.printInfo("this line should not be reached!");
     }
 
-    public void cancelBooking(){
-        System.out.println("Cancel a booking");
+    public void cancelBooking() throws SQLException {
+        System.out.print("Choose a valid booking id: ");
+        Scanner scan = new Scanner(System.in);
+        int userBookingID = scan.nextInt();
+        if(!MySQLObj.genericCheckIfIDExists("Books", "BookingID", userBookingID)){
+            Utils.printInfo("Booking ID does not exist.");
+            return;
+        }
+        if(!MySQLObj.checkIfRenterCreatedBooking(userBookingID, this.getSin())){
+            Utils.printInfo("Booking ID is not created by this user.");
+            return;
+        }
+        if(!MySQLObj.checkIfBookingIsReserved(userBookingID, this.getSin())){
+            Utils.printInfo("Booking ID is already not reserved.");
+            return;
+        }
+        MySQLObj.cancelBooking(userBookingID, this.getSin());
+        Utils.printInfo("Booking ID successfully cancelled.");
     }
 
     public void getHistory(){
