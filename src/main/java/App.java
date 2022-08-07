@@ -6,7 +6,6 @@ public class App {
     static Scanner scan;
     public static void main(String[] args) throws SQLException, ParseException {
         MySQLObj sqlObj = MySQLObj.getInstance();
-
         scan = new Scanner(System.in);
         User user = null;
         boolean exit = false;

@@ -5,7 +5,9 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Scanner;
 
+
 public class Reports {
+
 
     public void mainLoop() throws SQLException, ParseException {
         Scanner scan = new Scanner(System.in);
@@ -24,11 +26,6 @@ public class Reports {
             switch (userInput) {
                 case "1"-> NumBookings1();
                 case "2"-> NumBookings2();
-                case "3"-> removeListing();
-                case "4"-> updatePrice();
-                case "5"-> updateAvailability();
-                case "6"-> getHistory();
-                case "7"-> comment();
                 case "q" -> exit = true;
             }
         }
@@ -121,6 +118,13 @@ public class Reports {
 
     }
 
-
+    public void LargestCancelationsHosts () {
+        MySQLObj.ViewLargestCancelationsHosts();
+    }
+    public void LargestCancelationsRenters () {
+        MySQLObj.ViewLargestCancelationsRenters();
+    }
+    public void DisplayMostPopularNPForListing() {
+    }
 
 }

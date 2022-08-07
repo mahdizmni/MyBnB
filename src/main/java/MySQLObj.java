@@ -1202,4 +1202,112 @@ public class MySQLObj {
             Utils.printError("Something went wrong!", e.getMessage());
         }
     }
+    public static ResultSet LargestCancelationsHosts() {
+        ResultSet rs = null;
+        try {
+            String today = Reports.getTodayString();
+            String lastyear = Reports.addDays(Reports.getToday(), -365);
+
+            String query = """
+                    SELECT b.Renter_SIN, COUNT(b.Renter_SIN) AS "cancelations" FROM
+                    Books AS b JOIN Canceled AS c ON c.BookingID = b.BookingID
+                    WHERE b.start >= ? AND b.end <= ?
+                    GROUP BY b.Renter_SIN
+                    ORDER BY cancelations DESC;
+                    """;
+            PreparedStatement ps = con.prepareStatement(query);
+            ps.setString(1, lastyear);
+            ps.setString(2, today);
+            rs = ps.executeQuery();
+
+            return rs;
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+            return rs;
+        }
+    }
+    public static void ViewLargestCancelationsHosts() {
+        ArrayList<ArrayList<Object>> listingsList = new ArrayList<>();
+        ResultSet listings = null;
+        try {
+            listings = LargestCancelationsHosts();
+            if (listings == null) {
+                System.out.println("no one canceled anything!");
+                return;
+            }
+            while (listings.next()) {
+
+                ArrayList<Object> listingData = new ArrayList<Object>();
+                listingData.add(listings.getInt("Renter_SIN"));
+                listingData.add(listings.getInt("cancelatins"));
+                listingsList.add(listingData);
+            }
+            int renter_sin = (int) listingsList.get(0).get(0);
+            int renter_cancelations = (int) listingsList.get(0).get(1);
+
+
+
+
+
+            Utils.printTable(new String[]{"User Email", "City", "# of Bookings"}, listingsList);
+        } catch (Exception e) {
+            Utils.printError("Something went wrong!", e.getMessage());
+        }
+    }
+
+    public static ResultSet LargestCancelationsRenters() {
+        ResultSet rs = null;
+        try {
+            String today = Reports.getTodayString();
+            String lastyear = Reports.addDays(Reports.getToday(), -365);
+
+            String query = """
+                    SELECT o.Host_SIN, COUNT(o.Host_SIN) AS "cancelations" FROM
+                    Owns AS o JOIN Books As b ON b.Listing_ID = o.Listing_ID
+                    JOIN Canceled AS c ON c.BookingId = b.BookingID
+                    WHERE b.start >= ? AND b.end <= ?
+                    GROUP BY o.Host_SIN
+                    ORDER BY cancelations DESC;
+                    """;
+            PreparedStatement ps = con.prepareStatement(query);
+            ps.setString(1, lastyear);
+            ps.setString(2, today);
+            rs = ps.executeQuery();
+
+            return rs;
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+            return rs;
+        }
+    }
+    public static void ViewLargestCancelationsRenters() {
+        ArrayList<ArrayList<Object>> listingsList = new ArrayList<>();
+        ResultSet listings = null;
+        try {
+            listings = LargestCancelationsRenters();
+            if (listings == null) {
+                System.out.println("no one canceled anything!");
+                return;
+            }
+            while (listings.next()) {
+
+                ArrayList<Object> listingData = new ArrayList<Object>();
+                listingData.add(listings.getInt("Renter_SIN"));
+                listingData.add(listings.getInt("cancelatins"));
+                listingsList.add(listingData);
+            }
+            int renter_sin = (int) listingsList.get(0).get(0);
+            int renter_cancelations = (int) listingsList.get(0).get(1);
+
+
+
+
+
+                Utils.printTable(new String[]{"User Email", "City", "# of Bookings"}, listingsList);
+        } catch (Exception e) {
+            Utils.printError("Something went wrong!", e.getMessage());
+        }
+    }
+
+
 }
