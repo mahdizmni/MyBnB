@@ -498,11 +498,18 @@ public class MySQLObj {
         try {
             String query = """
                     UPDATE Books
-                    set isReserved = False || isReserved
+                    set isReserved = False 
                     WHERE BookingID = ?;
                     """;
             PreparedStatement ps = con.prepareStatement(query);
             ps.setInt(1, booking_id);
+            String today = Reports.getTodayString();
+            query = """
+                    INSERT INTO Canceled VALUES(?, '?');
+                    """;
+            ps = con.prepareStatement(query);
+            ps.setInt(1, booking_id);
+            ps.setString(2, today);
             ps.executeUpdate();
             return true;
         } catch (SQLException e) {
@@ -1104,6 +1111,42 @@ public class MySQLObj {
         } catch (SQLException e) {
             System.out.println(e.getMessage());
             return rs;
+        }
+    }
+    public static ResultSet RankRentersByBookingInPeriod(String start, String end) {
+        ResultSet rs = null;
+        try {
+            String query = """
+                    SELECT u.email, COUNT(b.BookingID) AS "# of Bookings" FROM
+                    User AS u JOIN Books AS b ON b.Renter_SIN = u.SIN
+                    WHERE b.start >= ? AND b.end <= ?
+                    GROUP BY u.email;
+                    """;
+            PreparedStatement ps = con.prepareStatement(query);
+            ps.setString(1, start);
+            ps.setString(2, end);
+            rs = ps.executeQuery();
+
+            return rs;
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+            return rs;
+        }
+    }
+    public static void ViewRankRentersByBookingInPeriod(String start, String end) {
+        ArrayList<ArrayList<Object>> listingsList = new ArrayList<>();
+        ResultSet listings = null;
+        try {
+            listings = RankRentersByBookingInPeriod(start, end);
+            while (listings.next()) {
+                ArrayList<Object> listingData = new ArrayList<Object>();
+                listingData.add(listings.getString("email"));
+                listingData.add(listings.getString("# of Bookings"));
+                listingsList.add(listingData);
+            }
+            Utils.printTable(new String[]{"User Email", "Country", "# of Listings"}, listingsList);
+        } catch (Exception e) {
+            Utils.printError("Something went wrong!", e.getMessage());
         }
     }
 }

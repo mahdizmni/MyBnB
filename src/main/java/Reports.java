@@ -1,5 +1,7 @@
 import java.sql.SQLException;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Scanner;
 
 public class Reports {
@@ -54,6 +56,23 @@ public class Reports {
             System.out.println("Number of Bookings in the specified date range and location: " + res);
     }
 
+    public static String sdfPattern = "yyyy-MM-dd";
+
+    public static Date getToday()
+    {
+        return new Date();
+    }
+
+    public static String formatDateToString(Date date)
+    {
+        SimpleDateFormat sdf = new SimpleDateFormat(sdfPattern);
+        return sdf.format(date);
+    }
+
+    public static String getTodayString(){
+        return formatDateToString(getToday());
+    }
+
     public void ListingsNumberPerCountry() {
         MySQLObj.ViewCountListingsByCountry();
     }
@@ -74,5 +93,15 @@ public class Reports {
     public void CommercialHosts() {
         MySQLObj.ViewCommercialHosts();
     }
+    public void RankRentersByBookingInPeriod() {
+        Scanner scan = new Scanner(System.in);
+        System.out.println("enter start date");
+        String start = scan.nextLine();
+        System.out.println("enter end date");
+        String end = scan.nextLine();
+
+        MySQLObj.ViewRankRentersByBookingInPeriod(start, end);
+    }
+
 
 }
