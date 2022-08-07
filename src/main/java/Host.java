@@ -180,7 +180,16 @@ public class Host extends User{
     }
 
     public void updatePrice(){
+        Scanner input = new Scanner(System.in);
         System.out.println("Update Price");
+        System.out.println("All listings");
+        MySQLObj.ViewAllHostListings(getSin());
+        System.out.println("enter a listing id");
+        int listing_id = Integer.parseInt(input.nextLine());
+        System.out.println("enter price");          // TODO: valid price
+        int price = Integer.parseInt(input.nextLine());
+        if (!MySQLObj.UpdatePrice(listing_id, price, getSin()))
+            System.out.println("invalid listing id");
     }
 
     public void updateAvailability(){
