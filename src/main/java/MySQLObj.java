@@ -509,6 +509,27 @@ public class MySQLObj {
             return false;
         }
     }
+    public static void ViewGetHistory(int host_sin) {
+        ArrayList<ArrayList<Object>> listingsList = new ArrayList<>();
+        ResultSet listings = null;
+        try{
+            listings = GetHistory(host_sin);
+            while (listings.next()) {
+                ArrayList<Object> listingData = new ArrayList<Object>();
+                listingData.add(listings.getInt("Listing_ID"));
+                listingData.add(listings.getString("firstname"));
+                listingData.add(listings.getString("lastname"));
+                listingData.add(listings.getString("start"));
+                listingData.add(listings.getString("end"));
+                listingData.add(listings.getBoolean("isReserved"));
+                listingsList.add(listingData);
+            }
+            Utils.printTable(new String[]{"Listing ID", "first name", "last name", "start", "end", "Did not get canceled"},listingsList);
+        }
+        catch (Exception e){
+            Utils.printError("Something went wrong!", e.getMessage());
+        }
+    }
     public static void ViewAllBookedListings(int host_sin) {
         ArrayList<ArrayList<Object>> listingsList = new ArrayList<>();
         ResultSet listings = null;
@@ -791,6 +812,298 @@ public class MySQLObj {
         } catch (SQLException e) {
             //  System.out.println(e.getMessage());
             return false;
+        }
+    }
+    public static int CountBookings2(String postalcode, String city) {
+        try {
+            String query = """
+                    SELECT Count(b.BookingID) FROM 
+                    Books AS b JOIN LocatedIn AS l ON l.Listing_ID = b.Listing_ID
+                    JOIN Address AS a ON a.ID = l.Address_ID
+                    WHERE a.postalcode = ? AND City.name = ?;
+                    """;
+            PreparedStatement ps = con.prepareStatement(query);
+            ps.setString(1, postalcode);
+            ps.setString(2, city);
+            ResultSet rs = ps.executeQuery();
+            rs.next();
+            return rs.getInt(1);
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+            return -1;
+        }
+    }
+    public static int CountBookings1(int start, int end, String city) {
+        try {
+            String query = """
+                    SELECT Count(b.BookingID) FROM
+                    Books AS b JOIN LocatedIn AS l ON l.Listing_ID = b.Listing_ID
+                    JOIN IsIn ON IsIn.Address_ID = l.Address_ID
+                    JOIN City ON City.ID = IsIn.City_ID
+                    WHERE b.start <= ? AND b.end >= ? AND City.name = ?;
+                    """;
+            PreparedStatement ps = con.prepareStatement(query);
+            ps.setInt(1, end);
+            ps.setInt(2, start);
+            ps.setString(3, city);
+            ResultSet rs = ps.executeQuery();
+            rs.next();
+            return rs.getInt(1);
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+            return -1;
+        }
+    }
+    public static ResultSet GetHistory(int host_sin) {
+        ResultSet rs = null;
+        try {
+            String query = """
+                    SELECT o.Listing_ID, u.firstname, u.lastname, b.start, b.end, b.isReserved FROM
+                    Owns AS o JOIN Books AS b ON b.Listing_ID = o.Listing_ID 
+                    JOIN User AS u ON u.SIN = b.Renter_SIN 
+                    WHERE o.Host_SIN = ?; 
+                    """;
+            PreparedStatement ps = con.prepareStatement(query);
+            ps.setInt(1, host_sin);
+            rs = ps.executeQuery();
+
+            return rs;
+        } catch (SQLException e) {
+            return rs;
+        }
+    }
+    public static ResultSet CountListingsByCountryPostalcode() {
+        ResultSet rs = null;
+        try {
+            String query = """
+                    SELECT Country.name AS "country", City.name AS "city", Address.postalcode, COUNT(l.ID) AS "# of Listing" FROM
+                    Listings AS l JOIN LocatedIn AS lo ON lo.Listing_ID = l.ID
+                    JOIN IsIn ON IsIn.Address_ID = lo.Address_ID
+                    JOIN BelongsTo ON BelongsTo.City_ID = IsIn.City_ID
+                    JOIN Country ON Country.ID = BelongsTo.Country_ID
+                    JOIN City ON City.ID = IsIn.City_ID 
+                    JOIN Address ON IsIn.Address_ID = Address.ID
+                    GROUP BY Country.name, City.name, Address.postalcode; 
+                    """;
+            PreparedStatement ps = con.prepareStatement(query);
+            rs = ps.executeQuery();
+            return rs;
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+            return rs;
+        }
+    }
+    public static void ViewCountListingsByCountryCityPostalcode() {
+        ArrayList<ArrayList<Object>> listingsList = new ArrayList<>();
+        ResultSet listings = null;
+        try {
+            listings = CountListingsByCountryPostalcode();
+            while (listings.next()) {
+                ArrayList<Object> listingData = new ArrayList<Object>();
+                listingData.add(listings.getString("country"));
+                listingData.add(listings.getString("city"));
+                listingData.add(listings.getString("postalcode"));
+                listingData.add(listings.getString("# of Listing"));
+                listingsList.add(listingData);
+            }
+            Utils.printTable(new String[]{"Country", "City", "Postal Code", "# of Listings"}, listingsList);
+        } catch (Exception e) {
+            Utils.printError("Something went wrong!", e.getMessage());
+        }
+    }
+    public static ResultSet CountListingsByCountry() {
+        ResultSet rs = null;
+        try {
+            String query = """
+                    SELECT Country.name, COUNT(l.ID) AS "# of Listing" FROM
+                    Listings AS l JOIN LocatedIn AS lo ON   lo.Listing_ID = l.ID
+                    JOIN IsIn ON IsIn.Address_ID = lo.Address_ID
+                    JOIN BelongsTo ON BelongsTo.City_ID = IsIn.City_ID
+                    JOIN Country ON Country.ID = BelongsTo.Country_ID
+                    GROUP BY Country.name; 
+                    """;
+            PreparedStatement ps = con.prepareStatement(query);
+            rs = ps.executeQuery();
+            return rs;
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+            return rs;
+        }
+    }
+    public static ResultSet RankHostsByListingsPerCity() {
+        ResultSet rs = null;
+        try {
+            String query = """
+                    SELECT u.email, City.name, COUNT(o.Listing_ID) AS "# of Listings" FROM
+                    User AS u JOIN Owns AS o ON o.Host_SIN = u.SIN
+                    JOIN LocatedIn ON LocatedIn.Listing_ID = o.Listing_ID
+                    JOIN IsIn On IsIn.Address_ID = LocatedIn.Address_ID
+                    JOIN City ON City.ID = IsIn.City_ID
+                    GROUP BY u.email, City.name
+                    ORDER BY COUNT(o.Listing_ID) DESC; 
+                    """;
+            PreparedStatement ps = con.prepareStatement(query);
+            rs = ps.executeQuery();
+
+            return rs;
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+            return rs;
+        }
+    }
+    public static void ViewRankHostsByListingsPerCity() {
+        ArrayList<ArrayList<Object>> listingsList = new ArrayList<>();
+        ResultSet listings = null;
+        try {
+            listings = RankHostsByListingsPerCity();
+            while (listings.next()) {
+                ArrayList<Object> listingData = new ArrayList<Object>();
+                listingData.add(listings.getString("email"));
+                listingData.add(listings.getString("name"));
+                listingData.add(listings.getString("# of Listing"));
+                listingsList.add(listingData);
+            }
+            Utils.printTable(new String[]{"User Email", "City", "# of Listings"}, listingsList);
+        } catch (Exception e) {
+            Utils.printError("Something went wrong!", e.getMessage());
+        }
+    }
+    public static ResultSet RankHostsByListingsPerCountry() {
+        ResultSet rs = null;
+        try {
+            String query = """
+                    SELECT u.email, Country.name, COUNT(o.Listing_ID) AS "# of Listings" FROM
+                    User AS u JOIN Owns AS o ON o.Host_SIN = u.SIN
+                    JOIN LocatedIn ON LocatedIn.Listing_ID = o.Listing_ID
+                    JOIN IsIn On IsIn.Address_ID = LocatedIn.Address_ID
+                    JOIN BelongsTo on BelongsTo.City_ID = IsIn.City_ID
+                    JOIN Country on Country.ID = BelongsTo.Country_ID
+                    GROUP BY u.email, Country.name
+                    ORDER BY COUNT(o.Listing_ID) DESC; 
+                    """;
+            PreparedStatement ps = con.prepareStatement(query);
+            rs = ps.executeQuery();
+
+            return rs;
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+            return rs;
+        }
+    }
+    public static void ViewRankHostsByListingsPerCountry() {
+        ArrayList<ArrayList<Object>> listingsList = new ArrayList<>();
+        ResultSet listings = null;
+        try {
+            listings = RankHostsByListingsPerCountry();
+            while (listings.next()) {
+                ArrayList<Object> listingData = new ArrayList<Object>();
+                listingData.add(listings.getString("email"));
+                listingData.add(listings.getString("name"));
+                listingData.add(listings.getString("# of Listings"));
+                listingsList.add(listingData);
+            }
+            Utils.printTable(new String[]{"User Email", "Country", "# of Listings"}, listingsList);
+        } catch (Exception e) {
+            Utils.printError("Something went wrong!", e.getMessage());
+        }
+    }
+    public static void ViewCountListingsByCountry() {
+        ArrayList<ArrayList<Object>> listingsList = new ArrayList<>();
+        ResultSet listings = null;
+        try {
+            listings = CountListingsByCountry();
+            while (listings.next()) {
+                ArrayList<Object> listingData = new ArrayList<Object>();
+                listingData.add(listings.getString("name"));
+                listingData.add(listings.getString("# of Listing"));
+                listingsList.add(listingData);
+            }
+            Utils.printTable(new String[]{"Country", "# of Listings"}, listingsList);
+        } catch (Exception e) {
+            Utils.printError("Something went wrong!", e.getMessage());
+        }
+    }
+    public static void ViewCountListingsByCountryCity() {
+        ArrayList<ArrayList<Object>> listingsList = new ArrayList<>();
+        ResultSet listings = null;
+        try {
+            listings = CountListingsByCountryCity();
+            while (listings.next()) {
+                ArrayList<Object> listingData = new ArrayList<Object>();
+                listingData.add(listings.getString("name"));
+                listingData.add(listings.getString("city"));
+                listingData.add(listings.getString("# of Listing"));
+                listingsList.add(listingData);
+            }
+            Utils.printTable(new String[]{"Country", "City", "# of Listings"}, listingsList);
+        } catch (Exception e) {
+            Utils.printError("Something went wrong!", e.getMessage());
+        }
+    }
+    public static ResultSet CommercialHosts() {
+        ResultSet rs = null;
+        try {
+            String query = """
+                    SELECT u.email, co.name, ci.name AS "city", COUNT(o.Listing_ID) AS "# of Listings" FROM
+                    User AS u JOIN Owns AS o ON o.Host_SIN = u.SIN
+                    JOIN LocatedIn ON LocatedIn.Listing_ID = o.Listing_ID
+                    JOIN IsIn On IsIn.Address_ID = LocatedIn.Address_ID
+                    JOIN BelongsTo on BelongsTo.City_ID = IsIn.City_ID
+                    JOIN Country AS co ON co.ID = BelongsTo.Country_ID
+                    JOIN City AS ci ON ci.ID = IsIn.City_ID
+                    GROUP BY u.email, co.name, ci.name
+                    Having COUNT(o.Listing_ID) > (SELECT (SELECT Count(l.ID) FROM
+                                                    Listings AS l JOIN LocatedIn ON LocatedIn.Listing_ID = l.ID
+                                                    JOIN IsIn On IsIn.Address_ID = LocatedIn.Address_ID
+                                                    JOIN BelongsTo on BelongsTo.City_ID = IsIn.City_ID
+                                                    JOIN Country on Country.ID = BelongsTo.Country_ID
+                                                    JOIN City ON City.ID = IsIn.City_ID
+                                                    WHERE City.name = ci.name AND Country.name = co.name) DIV 10);
+                    """;
+            PreparedStatement ps = con.prepareStatement(query);
+            rs = ps.executeQuery();
+            return rs;
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+            return rs;
+        }
+        }
+    public static void ViewCommercialHosts() {
+        ArrayList<ArrayList<Object>> listingsList = new ArrayList<>();
+        ResultSet listings = null;
+        try {
+            listings = CommercialHosts();
+            while (listings.next()) {
+                ArrayList<Object> listingData = new ArrayList<Object>();
+                listingData.add(listings.getString("email"));
+                listingData.add(listings.getString("name"));
+                listingData.add(listings.getString("city"));
+                listingData.add(listings.getString("# of Listings"));
+                listingsList.add(listingData);
+            }
+            Utils.printTable(new String[]{"User Email", "Country", "City", "# of Listings"}, listingsList);
+        } catch (Exception e) {
+            Utils.printError("Something went wrong!", e.getMessage());
+        }
+    }
+    public static ResultSet CountListingsByCountryCity() {
+        ResultSet rs = null;
+        try {
+            String query = """
+                    SELECT Country.name, City.name AS "city", COUNT(l.ID) AS "# of Listing" FROM
+                    Listings AS l JOIN LocatedIn AS lo ON   lo.Listing_ID = l.ID
+                    JOIN IsIn ON IsIn.Address_ID = lo.Address_ID
+                    JOIN BelongsTo ON BelongsTo.City_ID = IsIn.City_ID
+                    JOIN Country ON Country.ID = BelongsTo.Country_ID
+                    JOIN City ON City.ID = IsIn.City_ID
+                    GROUP BY Country.name, City.name; 
+                    """;
+            PreparedStatement ps = con.prepareStatement(query);
+            rs = ps.executeQuery();
+            return rs;
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+            return rs;
         }
     }
 }

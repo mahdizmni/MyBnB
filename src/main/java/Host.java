@@ -37,6 +37,7 @@ public class Host extends User{
             }
         }
     }
+    // TODO: check date
 
     public void createListing() throws SQLException {
         Scanner input = new Scanner(System.in);
@@ -320,8 +321,9 @@ public class Host extends User{
     }
 
     public void getHistory(){
-        System.out.println("no need");
+        MySQLObj.ViewGetHistory(getSin());
     }
+
 
     public void comment() throws SQLException {
         // TODO: recently
