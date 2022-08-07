@@ -1,11 +1,13 @@
 import dnl.utils.text.table.TextTable;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
 public class Utils {
     public static String divider = "=============";
+    public static String sdfPattern = "yyyy-MM-dd";
 
     public static void printDivider(String text){
         System.out.println(divider + text + divider);
@@ -48,6 +50,17 @@ public class Utils {
         cal.setTime(date);
         cal.add(Calendar.DATE, days);
         return cal.getTime();
+    }
+
+    public static Date getToday()
+    {
+        return new Date();
+    }
+
+    public static String formatDateToString(Date date)
+    {
+        SimpleDateFormat sdf = new SimpleDateFormat(sdfPattern);
+        return sdf.format(date);
     }
 
     public static String formatAddress(Object [] addressInfo){

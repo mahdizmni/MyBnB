@@ -118,7 +118,7 @@ public class Renter extends User{
         String targetStartDateString = apse.getString("start");
         String targetEndDateString = apse.getString("end");
 
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat sdf = new SimpleDateFormat(Utils.sdfPattern);
         Date targetStartDate = sdf.parse(targetStartDateString);
         Date targetEndDate = sdf.parse(targetEndDateString);
         Date userStartDate = sdf.parse(userStartDateString);
