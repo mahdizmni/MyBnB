@@ -45,7 +45,8 @@ public class Host extends User{
         double lat, lon;
         String amenities, type;
         int start, end, num, address_id = 0, city_id = 0, country_id = 0, type_id,
-                listing_id, amenities_id = 0, period_id, price;
+                listing_id, amenities_id = 0, period_id;
+        float price;
         String city, country, postalcode, street, buff;
         boolean addtoaddress, addtocity, addtocountry;
         addtoaddress = false; addtocity = false; addtocountry = false;
@@ -140,7 +141,7 @@ public class Host extends User{
                 System.out.println("end date(e.g 20220907):");
                 end = Integer.parseInt(input.nextLine());
                 System.out.println("price:");
-                price = Integer.parseInt(input.nextLine());
+                price = Float.parseFloat(input.nextLine());
 
                 // add these to table
                 if (MySQLObj.addToPeriod(start, end))
@@ -245,7 +246,7 @@ public class Host extends User{
         }
 
         System.out.println("set a price");          // TODO: valid price
-        int price = Integer.parseInt(input.nextLine());
+        float price = Float.parseFloat(input.nextLine());
 
         if (MySQLObj.UpdatePrice(listing_id, period_id, price))
             System.out.println("success");
@@ -298,11 +299,21 @@ public class Host extends User{
         System.out.println("end date(e.g 20220907):");
         int end = Integer.parseInt(input.nextLine());
 
-        //TODO: check if new dates do not overlap with other available intervals for the same listing
+        int previous_period_id = period_id;
+
         if (MySQLObj.addToPeriod(start, end))
             period_id = MySQLObj.getRecentID();
         else
             period_id = MySQLObj.getPeriodID(start ,end);
+
+        // new time does not overlap
+        if (MySQLObj.DoesNotOverlap(start, listing_id)) {
+            MySQLObj.UpdateAvailability(listing_id, period_id, previous_period_id);
+            System.out.println("success");
+        } else {
+            System.out.println("overlaps!");
+        }
+
 
         return;
 
@@ -355,7 +366,7 @@ public class Host extends User{
             System.out.println("has not rented from you!");
             return;
         }
-        // insert comment
+        // insert score
         System.out.println("insert a rating out of 10. hit enter to send.");
         int rate = Integer.parseInt(input.nextLine());
         if (MySQLObj.RatesOnUser(getSin(), renter_sin, rate))

@@ -239,10 +239,10 @@ public class MySQLObj {
             return false;
         }
     }
-    public static boolean addToAvailableIn(int listing_id, int period_id, int price) throws SQLException {
+    public static boolean addToAvailableIn(int listing_id, int period_id, float price) throws SQLException {
         try {
 
-        String query = "INSERT INTO AvailableIn VALUES (%d, %d, %d)";
+        String query = "INSERT INTO AvailableIn VALUES (%d, %d, %f)";
         query = String.format(query, listing_id, period_id, price);
         PreparedStatement ps = con.prepareStatement(query);
         ps.executeUpdate();
@@ -366,19 +366,17 @@ public class MySQLObj {
             Utils.printError("Something went wrong!", e.getMessage());
         }
     }
-    public static ResultSet AllListingsWithPrice(int host_sin, int listing_id) {
+    public static ResultSet AllListingsWithPrice(int listing_id) {
         ResultSet rs = null;
         try {
             String query = """
-                    SELECT AvailableIn.Period_ID, Listings.ID, Period.start, Period.end, AvailableIn.price 
+                    SELECT AvailableIn.Period_ID, Period.start, Period.end, AvailableIn.price 
                     FROM AvailableIn JOIN Period ON Period.ID = AvailableIn.Period_ID 
                         JOIN Listings ON Listings.ID = AvailableIn.Listing_ID
-                    WHERE Listings.ID = ? AND Listings.ID IN (SELECT Listing_ID FROM Owns
-                                                                WHERE Host_SIN = ?)
+                    WHERE Listings.ID = ?;
                     """;
             PreparedStatement ps = con.prepareStatement(query);
             ps.setInt(1, listing_id);
-            ps.setInt(2, host_sin);
             rs = ps.executeQuery();
 
             return rs;
@@ -390,13 +388,13 @@ public class MySQLObj {
         ArrayList<ArrayList<Object>> listingsList = new ArrayList<>();
         ResultSet listings = null;
         try{
-            listings = AllListingsWithPrice(host_sin, listing_id);
+            listings = AllListingsWithPrice(listing_id);
             while (listings.next()) {
                 ArrayList<Object> listingData = new ArrayList<Object>();
                 listingData.add(listings.getInt("Period_ID"));
-                listingData.add(listings.getInt("start"));
-                listingData.add(listings.getInt("end"));
-                listingData.add(listings.getInt("price"));
+                listingData.add(listings.getString("start"));
+                listingData.add(listings.getString("end"));
+                listingData.add(listings.getFloat("price"));
                 listingsList.add(listingData);
             }
             Utils.printTable(new String[]{"ID, start date, end date, price"},listingsList);
@@ -538,9 +536,10 @@ public class MySQLObj {
                     """;
             PreparedStatement ps = con.prepareStatement(query);
             ps.setInt(1, listing_id);
-            ResultSet rs = ps.executeQuery();
+            ps.executeUpdate();
             return true;
         } catch (SQLException e) {
+            System.out.println(e.getMessage());
             return false;
         }
     }
@@ -672,15 +671,33 @@ public class MySQLObj {
             return "not found";
         }
     }
-    public static boolean UpdatePrice (int listing_id, int period_id, int price) {
+    public static boolean UpdateAvailability (int listing_id, int period_id, int previous_period_id) {
         try {
             String query = """
                     UPDATE AvailableIn
-                    SET price = ? || price
-                    WHERE Listing_ID = ? AND Period_IC = ?;
+                    SET Period_ID = ?
+                    WHERE Listing_ID = ? AND Period_ID = ?;
                     """;
             PreparedStatement ps = con.prepareStatement(query);
-            ps.setInt(1, price);
+            ps.setFloat(1, period_id);
+            ps.setInt(2, listing_id);
+            ps.setInt(3, previous_period_id);
+            ps.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+            return false;
+        }
+    }
+    public static boolean UpdatePrice (int listing_id, int period_id, float price) {
+        try {
+            String query = """
+                    UPDATE AvailableIn
+                    SET price = ? 
+                    WHERE Listing_ID = ? AND Period_ID = ?;
+                    """;
+            PreparedStatement ps = con.prepareStatement(query);
+            ps.setFloat(1, price);
             ps.setInt(2, listing_id);
             ps.setInt(3, period_id);
             ps.executeUpdate();
@@ -720,7 +737,7 @@ public class MySQLObj {
         try {
             String query = """
                     SELECT p.end, b.start FROM
-                    Book AS b JOIN AvailableIn ON b.Listing_ID = AvailableIn.Listing_ID
+                    Books AS b JOIN AvailableIn ON b.Listing_ID = AvailableIn.Listing_ID
                     JOIN Period AS p ON p.ID = AvailableIn.Period_ID
                     WHERE b.Listing_ID = ? AND p.ID = ? AND b.isReserved = True;
                     """;
@@ -747,7 +764,23 @@ public class MySQLObj {
             return false;
         }
     }
-
+    public static boolean DoesNotOverlap(int start, int listing_id) {
+        try {
+            String query = """
+                    SELECT DISTINCT start FROM Period
+                    WHERE start = ? AND start <= ANY (SELECT end FROM AvailableIn
+                                                    WHERE Listing_ID = ?);
+                    """;
+            PreparedStatement ps = con.prepareStatement(query);
+            ps.setInt(1, start);
+            ps.setInt(2, listing_id);
+            ResultSet rs = ps.executeQuery();
+            return !rs.next();
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+            return false;
+        }
+    }
     public static boolean RatesOnUser(int user1, int user2, int score) throws SQLException {
         try {
             String query = "INSERT INTO RatesOnUser(User1_SIN, User2_SIN, score) VALUES (%d, %d, %d)";
