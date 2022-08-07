@@ -433,6 +433,24 @@ public class MySQLObj {
             return false;
         }
     }
+    public static boolean UpdateAvailability(int listing_id, int period_id, int host_sin) {
+        try {
+            String query = """
+                    UPDATE AvailableIn 
+                    set Period_ID = ? || Period_ID 
+                    WHERE Listing_ID = ? AND Listing_ID IN (SELECT Owns.Listing_ID
+                                                            WHERE Owns.Host_SIN = ?);
+                    """;
+            PreparedStatement ps = con.prepareStatement(query);
+            ps.setInt(1, period_id);
+            ps.setInt(2, listing_id);
+            ps.setInt(3, host_sin);
+            ResultSet rs = ps.executeQuery();
+            return true;
+        } catch (SQLException e) {
+            return false;
+        }
+    }
     public static boolean UpdatePrice(int listing_id, int price, int host_sin) {
         try {
             String query = """

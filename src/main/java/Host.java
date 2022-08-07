@@ -192,8 +192,25 @@ public class Host extends User{
             System.out.println("invalid listing id");
     }
 
-    public void updateAvailability(){
+    public void updateAvailability() throws SQLException {
         System.out.println("Update Availability");
+        Scanner input = new Scanner(System.in);
+        System.out.println("All listings");
+        MySQLObj.ViewAllHostListings(getSin());
+        System.out.println("enter a listing id");
+        int listing_id = Integer.parseInt(input.nextLine());
+        System.out.println("enter start");
+        int start = Integer.parseInt(input.nextLine());
+        System.out.println("enter end");
+        int end = Integer.parseInt(input.nextLine());
+        int period_id;
+        if (MySQLObj.addToPeriod(start, end))
+            period_id = MySQLObj.getRecentID();
+        else
+            period_id = MySQLObj.getPeriodID(start ,end);
+
+        if (MySQLObj.UpdateAvailability(listing_id, period_id, getSin()))
+            System.out.println("success!");
     }
 
     public void getHistory(){
