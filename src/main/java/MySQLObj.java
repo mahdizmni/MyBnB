@@ -241,6 +241,72 @@ public class MySQLObj {
         return preparedQuery.executeQuery();
     }
 
+    public static ResultSet searchByAddress(String address, Object obj) throws SQLException {
+        if(obj.getClass() != Search.class){
+            return null;
+        }
+
+        String baseQuery = """
+                SELECT DISTINCT ai.Listing_ID, a.*, ci.name, AVG(Price) as avgPrice
+                FROM AvailableIn AS ai
+                JOIN Period AS p ON ai.Period_ID = p.ID
+                JOIN LocatedIn AS li ON ai.Listing_ID = li.Listing_ID
+                JOIN Address AS a ON li.Address_ID = a.ID
+                JOIN IsIn AS ii ON ii.Address_ID = a.ID
+                JOIN City AS ci ON ii.City_ID = ci.ID
+                JOIN BelongsTo AS bo ON bo.City_ID = ci.ID
+                JOIN Country AS co ON co.ID = bo.Country_ID
+                JOIN Owns AS o ON o.Listing_ID = li.Listing_ID
+                WHERE CONCAT(num, ' ', street, ', ', ci.name, ', ', postalcode) = ?
+                    AND EXISTS(
+                        SELECT *
+                        FROM AvailableIn AS ai2
+                        WHERE ai2.Listing_ID = ai.Listing_ID AND price BETWEEN ? AND ?
+                    )
+                    AND EXISTS(
+                        SELECT *
+                        FROM AvailableIn AS ai2
+                        Join Period AS p2 ON ai2.Period_ID = p2.ID
+                        WHERE ai2.Listing_ID = ai.Listing_ID
+                              AND (p2.start BETWEEN DATE(?) AND DATE(?))
+                              AND (p2.end BETWEEN DATE(?) AND DATE(?))
+                    )
+                GROUP BY ai.Listing_ID, ci.name
+                ORDER BY avgPrice ASC;
+                """;
+
+        Search sObj = (Search) obj;
+        sObj.viewAllFilterOptions();
+        PreparedStatement preparedQuery = con.prepareStatement(baseQuery);
+        preparedQuery.setString(1, address);
+        preparedQuery.setDouble(2, sObj.priceRange[0]);
+        preparedQuery.setDouble(3, sObj.priceRange[1]);
+        preparedQuery.setString(4, sObj.dateRange[0]);
+        preparedQuery.setString(5, sObj.dateRange[1]);
+        preparedQuery.setString(6, sObj.dateRange[0]);
+        preparedQuery.setString(7, sObj.dateRange[1]);
+        return preparedQuery.executeQuery();
+    }
+
+    public static boolean checkIfAddressIsValid(String address) throws SQLException {
+        String query = """
+                SELECT *
+                FROM AvailableIn AS ai
+                JOIN Period AS p ON ai.Period_ID = p.ID
+                JOIN LocatedIn AS li ON ai.Listing_ID = li.Listing_ID
+                JOIN Address AS a ON li.Address_ID = a.ID
+                JOIN IsIn AS ii ON ii.Address_ID = a.ID
+                JOIN City AS ci ON ii.City_ID = ci.ID
+                JOIN BelongsTo AS bo ON bo.City_ID = ci.ID
+                JOIN Country AS co ON co.ID = bo.Country_ID
+                JOIN Owns AS o ON o.Listing_ID = li.Listing_ID
+                WHERE CONCAT(num, ' ', street, ', ', ci.name, ', ', postalcode) = ?
+                """;
+        PreparedStatement preparedQuery = con.prepareStatement(query);
+        preparedQuery.setString(1, address);
+        return preparedQuery.executeQuery().next();
+    }
+
     public static Boolean checkIfRenterHasRentedFromHost(int host_sin, int renter_sin) throws SQLException {
         String query = """
                 SELECT *

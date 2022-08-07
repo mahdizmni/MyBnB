@@ -63,6 +63,10 @@ public class Utils {
         return sdf.format(date);
     }
 
+    public static String getTodayString(){
+        return formatDateToString(getToday());
+    }
+
     public static String formatAddress(Object [] addressInfo){
         return String.format("%d %s, %s, %s", addressInfo);
     }
