@@ -22,7 +22,10 @@ public class Renter extends User{
                             "Book a listing",
                             "Cancel a booking",
                             "Get history of all bookings",
-                            "Comment on past hosts"});
+                            "Comment on past hosts",
+                            "Comment on past listings",
+                            "Rate on past hosts",
+                            "Rate on past listings"});
             String userInput = App.scan.nextLine();
             switch (userInput) {
                 case "1"-> viewAllAvailableListings();
@@ -30,7 +33,10 @@ public class Renter extends User{
                 case "3"-> bookListing();
                 case "4"-> cancelBooking();
                 case "5"-> getHistory();
-                case "6"-> comment();
+                case "6"-> commentOnHost();
+                case "7"-> commentOnListing();
+                case "8"-> rateOnHost();
+                case "9"-> rateOnListing();
                 case "q" -> exit = true;
             }
         }
@@ -211,7 +217,135 @@ public class Renter extends User{
         }
     }
 
-    public void comment(){
-        System.out.println("Comment on past hosts");
+    private void getPastBookings(){
+        ArrayList<ArrayList<Object>> gpbList = new ArrayList<>();
+        ResultSet gpbrs = null;
+        try{
+            gpbrs = MySQLObj.getPastBookings(this.getSin());
+            while (gpbrs.next()) {
+                ArrayList<Object> gpbData = new ArrayList<Object>();
+                gpbData.add(gpbrs.getInt("BookingID"));
+                gpbData.add(gpbrs.getInt("Host_SIN"));
+                gpbData.add(gpbrs.getInt("Listing_ID"));
+                String address = Utils.formatAddress(
+                        new Object[]{
+                                gpbrs.getInt("num"),
+                                gpbrs.getString("street"),
+                                gpbrs.getString("ci.name"),
+                                gpbrs.getString("postalcode")
+                        }
+                );
+                gpbData.add(address);
+                gpbData.add(gpbrs.getString("start"));
+                gpbData.add(gpbrs.getString("end"));
+                gpbList.add(gpbData);
+            }
+            Utils.printTable(new String[]{"Booking ID", "Host ID", "Listing_ID", "Address", "Start Date", "End Date"}, gpbList);
+        }
+        catch (Exception e){
+            Utils.printError("Something went wrong!", e.getMessage());
+        }
+    }
+
+    public void commentOnHost() throws SQLException {
+        Scanner scan = new Scanner(System.in);
+        // show all past hosts the renter has previously booked from
+        getPastBookings();
+        // choose a host ID
+        System.out.print("Choose a valid host ID: ");
+        int userHostID = scan.nextInt();
+        scan.nextLine();
+        // check if it's a valid host (user sin)
+        if(!MySQLObj.genericCheckIfIDExists("Owns", "Host_SIN", userHostID)){
+            Utils.printInfo("Host ID is not an ID of a valid host");
+            return;
+        }
+        // check if user has booked from this host before
+        if(!MySQLObj.checkIfRenterHasRentedFromHost(userHostID, this.getSin())){
+            Utils.printInfo("Renter has not rented from this host before");
+            return;
+        }
+        // insert comment
+        System.out.print("Insert a comment. Hit enter to send: ");
+        String comment = scan.nextLine();
+        if (MySQLObj.CommentsOnUser(getSin(), userHostID, comment))
+            Utils.printInfo("Successfully commented on Host!");
+    }
+
+    public void commentOnListing() throws SQLException {
+        Scanner scan = new Scanner(System.in);
+        // show all past listings the renter has previously booked
+        getPastBookings();
+        // choose a listing ID
+        System.out.print("Choose a valid listing ID: ");
+        int userListingID = scan.nextInt();
+        scan.nextLine();
+        // check if it's a valid listing ID
+        if(!MySQLObj.genericCheckIfIDExists("Listings", "ID", userListingID)){
+            Utils.printInfo("Listing ID does not exist");
+            return;
+        }
+        // check if user has booked the listing before
+        if(!MySQLObj.checkIfRenterHasBookedListing(userListingID, this.getSin())){
+            Utils.printInfo("Renter has not booked this listing before");
+            return;
+        }
+        // insert comment
+        System.out.print("Insert a comment. Hit enter to send: ");
+        String comment = scan.nextLine();
+        if (MySQLObj.CommentsOnListing(userListingID, getSin(), comment))
+            Utils.printInfo("Successfully commented on Listing!");
+    }
+
+    public void rateOnHost() throws SQLException {
+        Scanner scan = new Scanner(System.in);
+        // show all past hosts the renter has previously booked from
+        getPastBookings();
+        // choose a host ID
+        System.out.print("Choose a valid host ID: ");
+        int userHostID = scan.nextInt();
+        scan.nextLine();
+        // check if it's a valid host (user sin)
+        if(!MySQLObj.genericCheckIfIDExists("Owns", "Host_SIN", userHostID)){
+            Utils.printInfo("Host ID is not an ID of a valid host");
+            return;
+        }
+        // check if user has booked from this host before
+        if(!MySQLObj.checkIfRenterHasRentedFromHost(userHostID, this.getSin())){
+            Utils.printInfo("Renter has not rented from this host before");
+            return;
+        }
+        // insert rating
+        System.out.print("Insert a rating out of 5. Hit enter to send: ");
+        int rating = scan.nextInt();
+        scan.nextLine();
+        if (MySQLObj.RatesOnUser(getSin(), userHostID, rating))
+            Utils.printInfo("Successfully rated Host!");
+    }
+
+    public void rateOnListing() throws SQLException {
+        Scanner scan = new Scanner(System.in);
+        // show all past listings the renter has previously booked
+        getPastBookings();
+        // choose a listing ID
+        System.out.print("Choose a valid listing ID: ");
+        int userListingID = scan.nextInt();
+        scan.nextLine();
+        // check if it's a valid listing ID
+        if(!MySQLObj.genericCheckIfIDExists("Listings", "ID", userListingID)){
+            Utils.printInfo("Listing ID does not exist");
+            return;
+        }
+        // check if user has booked the listing before
+        if(!MySQLObj.checkIfRenterHasBookedListing(userListingID, this.getSin())){
+            Utils.printInfo("Renter has not booked this listing before");
+            return;
+        }
+        // insert rating
+        System.out.print("Insert a rating out of 5. Hit enter to send: ");
+        int rating = scan.nextInt();
+        scan.nextLine();
+        if (MySQLObj.RatesOnListing(userListingID, getSin(), rating))
+            Utils.printInfo("Successfully rated listing!");
     }
 }

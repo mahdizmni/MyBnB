@@ -221,4 +221,109 @@ public class MySQLObj {
         preparedQuery.setInt(1, renter_sin);
         return preparedQuery.executeQuery();
     }
+
+    public static ResultSet getPastBookings(int renter_sin) throws SQLException {
+        String query = """
+                SELECT BookingID, o.Host_SIN, b.Listing_ID, start, end, a.*, ci.name, co.name
+                FROM Books AS b
+                JOIN LocatedIn AS li ON b.Listing_ID = li.Listing_ID
+                JOIN Address AS a ON li.Address_ID = a.ID
+                JOIN IsIn AS ii ON ii.Address_ID = a.ID
+                JOIN City AS ci ON ii.City_ID = ci.ID
+                JOIN BelongsTo AS bo ON bo.City_ID = ci.ID
+                JOIN Country AS co ON co.ID = bo.Country_ID
+                JOIN Owns AS o ON o.Listing_ID = b.Listing_ID
+                WHERE b.Renter_SIN = ? AND b.isReserved = true AND b.Renter_SIN != o.Host_SIN
+                ORDER BY o.Host_SIN ASC;
+                """;
+        PreparedStatement preparedQuery = con.prepareStatement(query);
+        preparedQuery.setInt(1, renter_sin);
+        return preparedQuery.executeQuery();
+    }
+
+    public static Boolean checkIfRenterHasRentedFromHost(int host_sin, int renter_sin) throws SQLException {
+        String query = """
+                SELECT *
+                FROM Books AS b
+                JOIN Owns AS o ON b.Listing_ID = o.Listing_ID
+                WHERE o.Host_SIN = ? AND b.Renter_SIN = ?;
+                """;
+        PreparedStatement preparedQuery = con.prepareStatement(query);
+        preparedQuery.setInt(1, host_sin);
+        preparedQuery.setInt(2, renter_sin);
+        return preparedQuery.executeQuery().next();
+    }
+
+    public static Boolean checkIfRenterHasBookedListing(int listing_id, int renter_sin) throws SQLException {
+        String query = """
+                SELECT *
+                FROM Books AS b
+                WHERE b.Listing_ID = ? AND b.Renter_SIN = ?;
+                """;
+        PreparedStatement preparedQuery = con.prepareStatement(query);
+        preparedQuery.setInt(1, listing_id);
+        preparedQuery.setInt(2, renter_sin);
+        return preparedQuery.executeQuery().next();
+    }
+
+    public static boolean CommentsOnUser(int user1, int user2, String text) throws SQLException {
+        try {
+            String query = "INSERT INTO CommentsOnUser(User1_SIN, User2_SIN, text) VALUES (?, ?, ?)";
+            PreparedStatement ps = con.prepareStatement(query);
+            ps.setInt(1,user1);
+            ps.setInt(2,user2);
+            ps.setString(3,text);
+            ps.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            //  System.out.println(e.getMessage());
+            return false;
+        }
+    }
+
+    public static boolean RatesOnUser(int user1, int user2, int score) throws SQLException {
+        try {
+            String query = "INSERT INTO RatedOnUser(User1_SIN, User2_SIN, score) VALUES (?, ?, ?)";
+            PreparedStatement ps = con.prepareStatement(query);
+            ps.setInt(1,user1);
+            ps.setInt(2,user2);
+            ps.setInt(3,score);
+            ps.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            //  System.out.println(e.getMessage());
+            return false;
+        }
+    }
+
+    public static boolean CommentsOnListing(int listing_id, int user_sin, String text) throws SQLException {
+        try {
+            String query = "INSERT INTO CommentsOnListing(Listing_ID, User_SIN, text) VALUES (?, ?, ?)";
+            PreparedStatement ps = con.prepareStatement(query);
+            ps.setInt(1,listing_id);
+            ps.setInt(2,user_sin);
+            ps.setString(3,text);
+            ps.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            //  System.out.println(e.getMessage());
+            return false;
+        }
+    }
+
+    public static boolean RatesOnListing(int listing_id, int user_sin, int score) throws SQLException {
+        try {
+            String query = "INSERT INTO RatedOnListing(Listing_ID, User_SIN, score) VALUES (?, ?, ?)";
+            PreparedStatement ps = con.prepareStatement(query);
+            ps.setInt(1,listing_id);
+            ps.setInt(2,user_sin);
+            ps.setInt(3,score);
+            ps.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            //  System.out.println(e.getMessage());
+            return false;
+        }
+    }
+
 }
