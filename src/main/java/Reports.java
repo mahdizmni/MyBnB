@@ -1,6 +1,7 @@
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Scanner;
 
@@ -73,6 +74,13 @@ public class Reports {
         return formatDateToString(getToday());
     }
 
+    public static String addDays(Date date, int days)
+    {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        cal.add(Calendar.DATE, days);
+        return formatDateToString(cal.getTime());
+    }
     public void ListingsNumberPerCountry() {
         MySQLObj.ViewCountListingsByCountry();
     }
@@ -102,6 +110,17 @@ public class Reports {
 
         MySQLObj.ViewRankRentersByBookingInPeriod(start, end);
     }
+    public void RankRentersByBookingInPeriodPerCity() {
+        Scanner scan = new Scanner(System.in);
+        System.out.println("enter start date");
+        String start = scan.nextLine();
+        System.out.println("enter end date");
+        String end = scan.nextLine();
+
+        MySQLObj.ViewRankRentersByBookingInPeriodPerCity(start, end);
+
+    }
+
 
 
 }

@@ -1120,7 +1120,8 @@ public class MySQLObj {
                     SELECT u.email, COUNT(b.BookingID) AS "# of Bookings" FROM
                     User AS u JOIN Books AS b ON b.Renter_SIN = u.SIN
                     WHERE b.start >= ? AND b.end <= ?
-                    GROUP BY u.email;
+                    GROUP BY u.email
+                    ORDER BY COUNT(b.BookingID) DESC;
                     """;
             PreparedStatement ps = con.prepareStatement(query);
             ps.setString(1, start);
@@ -1144,7 +1145,59 @@ public class MySQLObj {
                 listingData.add(listings.getString("# of Bookings"));
                 listingsList.add(listingData);
             }
-            Utils.printTable(new String[]{"User Email", "Country", "# of Listings"}, listingsList);
+            Utils.printTable(new String[]{"User Email", "# of Bookings"}, listingsList);
+        } catch (Exception e) {
+            Utils.printError("Something went wrong!", e.getMessage());
+        }
+    }
+    public static ResultSet RankRentersByBookingInPeriodPerCity(String start, String end) {
+        ResultSet rs = null;
+        try {
+            String today = Reports.getTodayString();
+            String lastyear = Reports.addDays(Reports.getToday(), -365);
+
+            // Condition : Renters with more at least 2 bookings withing last year
+
+            String query = """
+                    SELECT u.email, City.name, COUNT(b.BookingID) AS "# of Bookings" FROM
+                    User AS u JOIN Books AS b ON b.Renter_SIN = u.SIN
+                    JOIN LocatedIn ON LocatedIn.Listing_ID = b.Listing_ID
+                    JOIN IsIn ON IsIn.Address_ID = LocatedIn.Address_ID
+                    JOIN City ON City.ID = IsIn.City_ID
+                    WHERE b.start >= ? AND b.end <= ? AND u.email IN (   SELECT u.email  FROM
+                                                                     User AS u JOIN Books AS b ON b.Renter_SIN = u.SIN
+                                                                      WHERE b.start >= ? AND b.end <= ?
+                                                                      GROUP BY u.email
+                                                                       HAVING COUNT(u.email) > 1 )
+                    GROUP BY u.email, City.name
+                    ORDER BY COUNT(b.BookingID) DESC;
+                    """;
+            PreparedStatement ps = con.prepareStatement(query);
+            ps.setString(1, start);
+            ps.setString(2, end);
+            ps.setString(3, lastyear);
+            ps.setString(4, today);
+            rs = ps.executeQuery();
+
+            return rs;
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+            return rs;
+        }
+    }
+    public static void ViewRankRentersByBookingInPeriodPerCity(String start, String end) {
+        ArrayList<ArrayList<Object>> listingsList = new ArrayList<>();
+        ResultSet listings = null;
+        try {
+            listings = RankRentersByBookingInPeriodPerCity(start, end);
+            while (listings.next()) {
+                ArrayList<Object> listingData = new ArrayList<Object>();
+                listingData.add(listings.getString("email"));
+                listingData.add(listings.getString("name"));
+                listingData.add(listings.getString("# of Bookings"));
+                listingsList.add(listingData);
+            }
+            Utils.printTable(new String[]{"User Email", "City", "# of Bookings"}, listingsList);
         } catch (Exception e) {
             Utils.printError("Something went wrong!", e.getMessage());
         }
