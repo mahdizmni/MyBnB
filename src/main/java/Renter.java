@@ -125,6 +125,7 @@ public class Renter extends User{
             MySQLObj.genericRemoveByID("Period", "ID", targetPeriodID);
             // add tuple in Books with new dates
             MySQLObj.createBooking(this.getSin(), userListingID, userStartDateString, userStartDateString);
+            Utils.printInfo("Booking successful!");
             return;
         }
         // check case 2
@@ -142,6 +143,7 @@ public class Renter extends User{
             }
             // add tuple in Books with new dates
             MySQLObj.createBooking(this.getSin(), userListingID, userStartDateString, userEndDateString);
+            Utils.printInfo("Booking successful!");
             return;
         }
         // check case 3
@@ -153,6 +155,7 @@ public class Renter extends User{
             MySQLObj.createAvailablePeriod(userListingID, sdf.format(Utils.addDays(userEndDate, 1)), targetEndDateString, targetPeriodPrice);
             // add tuple in Books with new dates
             MySQLObj.createBooking(this.getSin(), userListingID, userStartDateString, userEndDateString);
+            Utils.printInfo("Booking successful!");
             return;
         }
         // this line should not be reached
