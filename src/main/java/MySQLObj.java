@@ -331,6 +331,38 @@ public class MySQLObj {
             return -1;
         }
     }
+    public static ResultSet AllHostListings(int host_sin) {
+        ResultSet rs = null;
+        try {
+            String query = """
+                    SELECT Owns.Listing_ID FROM Owns
+                    WHERE Owns.Host_SIN = ?; 
+                    """;
+            PreparedStatement ps = con.prepareStatement(query);
+            ps.setInt(1, host_sin);
+            rs = ps.executeQuery();
+
+            return rs;
+        } catch (SQLException e) {
+            return rs;
+        }
+    }
+    public static void ViewAllHostListings(int host_sin) {
+        ArrayList<ArrayList<Object>> listingsList = new ArrayList<>();
+        ResultSet listings = null;
+        try{
+            listings = AllHostListings(host_sin);
+            while (listings.next()) {
+                ArrayList<Object> listingData = new ArrayList<Object>();
+                listingData.add(listings.getInt("Listing_ID"));
+                listingsList.add(listingData);
+            }
+            Utils.printTable(new String[]{"Listing ID"},listingsList);
+        }
+        catch (Exception e){
+            Utils.printError("Something went wrong!", e.getMessage());
+        }
+    }
     public static ResultSet AllBookedListings(int host_sin) {
         ResultSet rs = null;
         try {
@@ -383,6 +415,22 @@ public class MySQLObj {
         }
         catch (Exception e){
             Utils.printError("Something went wrong!", e.getMessage());
+        }
+    }
+    public static boolean RemoveListing(int listing_id, int host_sin) {
+        try {
+            String query = """
+                    DELETE FROM Listings
+                    WHERE Listings.ID = ? AND Listings.ID IN (SELECT Owns.Listing_ID 
+                                                    WHERE Owns.Host_SIN = ?);
+                    """;
+            PreparedStatement ps = con.prepareStatement(query);
+            ps.setInt(1, listing_id);
+            ps.setInt(2, host_sin);
+            ResultSet rs = ps.executeQuery();
+            return true;
+        } catch (SQLException e) {
+            return false;
         }
     }
 }

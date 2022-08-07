@@ -1,3 +1,4 @@
+import javax.security.sasl.SaslServer;
 import java.sql.SQLException;
 import java.util.Scanner;
 
@@ -168,7 +169,14 @@ public class Host extends User{
     }
 
     public void removeListing(){
+        Scanner input = new Scanner(System.in);
         System.out.println("Remove a listing");
+        System.out.println("All listings");
+        MySQLObj.ViewAllHostListings(getSin());
+        System.out.println("enter a listing id");
+        int listing_id = Integer.parseInt(input.nextLine());
+        if (!MySQLObj.RemoveListing(listing_id, getSin()))
+            System.out.println("invalid listing id");
     }
 
     public void updatePrice(){
