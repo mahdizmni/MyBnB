@@ -21,7 +21,7 @@ public class Renter extends User{
                             "View all available periods of a listing",
                             "Book a listing",
                             "Cancel a booking",
-                            "Get history of past hosts",
+                            "Get history of all bookings",
                             "Comment on past hosts"});
             String userInput = App.scan.nextLine();
             switch (userInput) {
@@ -182,7 +182,33 @@ public class Renter extends User{
     }
 
     public void getHistory(){
-        System.out.println("History");
+        ArrayList<ArrayList<Object>> grhList = new ArrayList<>();
+        ResultSet grhrs = null;
+        try{
+            grhrs = MySQLObj.getRenterHistory(this.getSin());
+            while (grhrs.next()) {
+                ArrayList<Object> grhData = new ArrayList<Object>();
+                grhData.add(grhrs.getInt("BookingID"));
+                grhData.add(grhrs.getInt("Listing_ID"));
+                String address = Utils.formatAddress(
+                        new Object[]{
+                                grhrs.getInt("num"),
+                                grhrs.getString("street"),
+                                grhrs.getString("ci.name"),
+                                grhrs.getString("postalcode")
+                        }
+                );
+                grhData.add(address);
+                grhData.add(grhrs.getString("start"));
+                grhData.add(grhrs.getString("end"));
+                grhData.add(grhrs.getBoolean("isReserved"));
+                grhList.add(grhData);
+            }
+            Utils.printTable(new String[]{"Booking ID", "Listing ID", "Address", "Start Date", "End Date", "Is Reserved"}, grhList);
+        }
+        catch (Exception e){
+            Utils.printError("Something went wrong!", e.getMessage());
+        }
     }
 
     public void comment(){

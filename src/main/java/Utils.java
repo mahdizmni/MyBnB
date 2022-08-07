@@ -49,4 +49,8 @@ public class Utils {
         cal.add(Calendar.DATE, days);
         return cal.getTime();
     }
+
+    public static String formatAddress(Object [] addressInfo){
+        return String.format("%d %s, %s, %s", addressInfo);
+    }
 }

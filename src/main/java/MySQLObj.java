@@ -203,4 +203,22 @@ public class MySQLObj {
         preparedQuery.setInt(2, renter_sin);
         return preparedQuery.executeQuery().next();
     }
+
+    public static ResultSet getRenterHistory(int renter_sin) throws SQLException {
+        String query = """
+                SELECT BookingID, b.Listing_ID, start, end, isReserved, a.*, ci.name, co.name
+                FROM Books AS b
+                JOIN LocatedIn AS li ON b.Listing_ID = li.Listing_ID
+                JOIN Address AS a ON li.Address_ID = a.ID
+                JOIN IsIn AS ii ON ii.Address_ID = a.ID
+                JOIN City AS ci ON ii.City_ID = ci.ID
+                JOIN BelongsTo AS bo on bo.City_ID = ci.ID
+                JOIN Country AS co on co.ID = bo.Country_ID
+                WHERE b.Renter_SIN = ?
+                ORDER BY start ASC;
+                """;
+        PreparedStatement preparedQuery = con.prepareStatement(query);
+        preparedQuery.setInt(1, renter_sin);
+        return preparedQuery.executeQuery();
+    }
 }
