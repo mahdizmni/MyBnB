@@ -1,4 +1,5 @@
 import java.sql.*;
+import java.util.ArrayList;
 
 public class MySQLObj {
     private final String uriDb = "jdbc:mysql://localhost:3306/MyBnB";
@@ -223,6 +224,18 @@ public class MySQLObj {
          //   System.out.println(e.getMessage());
         }
     }
+    public static boolean addToOwns(int host_sin, int listing_id) throws SQLException {
+        try {
+            String query = "INSERT INTO Owns VALUES (%d, %d)";
+            query = String.format(query, host_sin, listing_id);
+            PreparedStatement ps = con.prepareStatement(query);
+            ps.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            //  System.out.println(e.getMessage());
+            return false;
+        }
+    }
     public static boolean addToAvailableIn(int listing_id, int period_id, int price) throws SQLException {
         try {
 
@@ -316,6 +329,60 @@ public class MySQLObj {
         {
     //        System.out.println(e.getMessage());
             return -1;
+        }
+    }
+    public static ResultSet AllBookedListings(int host_sin) {
+        ResultSet rs = null;
+        try {
+            String query = """
+                    SELECT DISTINCT Owns.Listing_ID, b.BookingID, b.start, b.end FROM
+                    Owns JOIN Books AS b ON
+                    Owns.Listing_ID = b.Listing_ID 
+                    WHERE Owns.Host_SIN = ? AND b.isReserved = True;
+                    """;
+            PreparedStatement ps = con.prepareStatement(query);
+            ps.setInt(1, host_sin);
+            rs = ps.executeQuery();
+
+            return rs;
+        } catch (SQLException e) {
+            return rs;
+        }
+    }
+    public static boolean CancelBookedListing(int booking_id, int host_sin) {
+        try {
+            String query = """
+                    UPDATE Books
+                    set isReserved = False || isReserved
+                    WHERE BookingID = ? AND Listing_ID IN (SELECT Owns.Listing_ID
+                                                            WHERE Owns.Host_SIN = ?);
+                    """;
+            PreparedStatement ps = con.prepareStatement(query);
+            ps.setInt(1, booking_id);
+            ps.setInt(2, host_sin);
+            ResultSet rs = ps.executeQuery();
+            return true;
+        } catch (SQLException e) {
+            return false;
+        }
+    }
+    public static void ViewAllBookedListings(int host_sin) {
+        ArrayList<ArrayList<Object>> listingsList = new ArrayList<>();
+        ResultSet listings = null;
+        try{
+            listings = AllBookedListings(host_sin);
+            while (listings.next()) {
+                ArrayList<Object> listingData = new ArrayList<Object>();
+                listingData.add(listings.getInt("Listing_ID"));
+                listingData.add(listings.getString("BookingID"));
+                listingData.add(listings.getString("start"));
+                listingData.add(listings.getString("end"));
+                listingsList.add(listingData);
+            }
+            Utils.printTable(new String[]{"Listing ID", "Booking ID", "start", "end"},listingsList);
+        }
+        catch (Exception e){
+            Utils.printError("Something went wrong!", e.getMessage());
         }
     }
 }

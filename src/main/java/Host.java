@@ -99,6 +99,8 @@ public class Host extends User{
         MySQLObj.addToListings(lat, lon);
         listing_id = MySQLObj.getRecentID();
 
+        MySQLObj.addToOwns(getSin(), listing_id);
+
 //        System.out.println("listing id: " + listing_id + "type id :" + type_id + "address id : " + address_id + "city id : " + city_id + "country id : " + country_id);
         // Linking corresponding tables
         MySQLObj.addToListingsType(listing_id, type_id);
@@ -154,7 +156,15 @@ public class Host extends User{
     }
 
     public void cancelBooking(){
+        // TODO: today's date in consideration
+        Scanner input = new Scanner(System.in);
         System.out.println("Cancel a booking");
+        System.out.println("list of all booked listings");
+        MySQLObj.ViewAllBookedListings(getSin());
+        System.out.println("enter a booking id to cancel");
+        int booking_id = Integer.parseInt(input.nextLine());
+        if (!MySQLObj.CancelBookedListing(booking_id, getSin()))
+            System.out.println("invalid booking id");
     }
 
     public void removeListing(){
