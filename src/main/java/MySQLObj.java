@@ -735,5 +735,29 @@ public class MySQLObj {
             return rs;
         }
     }
+    public static boolean CommentsOnUser(int user1, int user2, String text) throws SQLException {
+        try {
+            String query = "INSERT INTO CommentsOnUser(User1_SIN, User2_SIN, text) VALUES (%d, %d, '%s')";
+            query = String.format(query, user1, user2, text);
+            PreparedStatement ps = con.prepareStatement(query);
+            ps.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            //  System.out.println(e.getMessage());
+            return false;
+        }
+    }
 
+    public static boolean RatesOnUser(int user1, int user2, int score) throws SQLException {
+        try {
+            String query = "INSERT INTO RatesOnUser(User1_SIN, User2_SIN, score) VALUES (%d, %d, %d)";
+            query = String.format(query, user1, user2, score);
+            PreparedStatement ps = con.prepareStatement(query);
+            ps.executeUpdate();
+            return true;
+        } catch (SQLException e) {
+            //  System.out.println(e.getMessage());
+            return false;
+        }
+    }
 }

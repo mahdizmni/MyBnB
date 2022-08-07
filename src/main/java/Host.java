@@ -312,7 +312,8 @@ public class Host extends User{
         System.out.println("no need");
     }
 
-    public void comment(){
+    public void comment() throws SQLException {
+        // TODO: recently
         Scanner input = new Scanner(System.in);
         System.out.println("Comment on past renters");
         // show all past renters with associated listing id
@@ -331,8 +332,33 @@ public class Host extends User{
             return;
         }
         // insert comment
-
+        System.out.println("insert a comment. hit enter to send.");
+        String comment = input.nextLine();
+        if (MySQLObj.CommentsOnUser(getSin(), renter_sin, comment))
+            System.out.println("success");
     }
-
-    public void rate() {}
+    public void rate() throws SQLException {
+        Scanner input = new Scanner(System.in);
+        System.out.println("rate on past renters");
+        // show all past renters with associated listing id
+        MySQLObj.ViewListingsHistory(getSin());
+        // choose a renter
+        System.out.println("insert a renter id");
+        int renter_sin = Integer.parseInt(input.nextLine());
+        // check if it's a valid renter (user sin)
+        if (!MySQLObj.ValidateUserID(renter_sin)) {
+            System.out.println("invalid User!");
+            return;
+        }
+        // check if has rented from this host before
+        if (!MySQLObj.MyRenter(renter_sin, getSin())) {
+            System.out.println("has not rented from you!");
+            return;
+        }
+        // insert comment
+        System.out.println("insert a rating out of 10. hit enter to send.");
+        int rate = Integer.parseInt(input.nextLine());
+        if (MySQLObj.RatesOnUser(getSin(), renter_sin, rate))
+            System.out.println("success");
+    }
 }
