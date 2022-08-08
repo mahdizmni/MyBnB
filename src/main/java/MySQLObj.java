@@ -294,7 +294,6 @@ public class MySQLObj {
         }
 
         baseQuery = String.format(baseQuery, amenitiesQueryString, orderByString);
-        System.out.println(baseQuery);
         sObj.viewAllFilterOptions();
         PreparedStatement preparedQuery = con.prepareStatement(baseQuery);
         preparedQuery.setString(1, address);
@@ -366,7 +365,6 @@ public class MySQLObj {
         }
 
         baseQuery = String.format(baseQuery, amenitiesQueryString, orderByString);
-        System.out.println(baseQuery);
         sObj.viewAllFilterOptions();
         PreparedStatement preparedQuery = con.prepareStatement(baseQuery);
         preparedQuery.setDouble(1, searchLon);
@@ -438,7 +436,6 @@ public class MySQLObj {
         }
 
         baseQuery = String.format(baseQuery, amenitiesQueryString, orderByString);
-        System.out.println(baseQuery);
         sObj.viewAllFilterOptions();
         PreparedStatement preparedQuery = con.prepareStatement(baseQuery);
         preparedQuery.setString(1, searchPostalCode);
