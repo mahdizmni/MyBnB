@@ -771,7 +771,8 @@ public class MySQLObj {
     }
     public static boolean RatesOnUser(int user1, int user2, int score) throws SQLException {
         try {
-            String query = "INSERT INTO RatesOnUser(User1_SIN, User2_SIN, score) VALUES (?, ?, ?)";
+            // todo: check rating validity 1- 5
+            String query = "INSERT INTO RatedOnUser(User1_SIN, User2_SIN, score) VALUES (?, ?, ?)";
             PreparedStatement ps = con.prepareStatement(query);
             ps.setInt(1, user1);
             ps.setInt(2, user2);

@@ -40,7 +40,7 @@ public class Host extends User{
     // TODO: check date
     public void createListing() throws SQLException {
         Scanner input = new Scanner(System.in);
-
+// todo: period overlaps or not
         double lat, lon;
         String amenities, type;
         int start, end, num, address_id = 0, city_id = 0, country_id = 0, type_id,
