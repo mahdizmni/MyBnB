@@ -1,5 +1,13 @@
+import dnl.utils.text.table.TextTable;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+
 public class Utils {
     public static String divider = "=============";
+    public static String sdfPattern = "yyyy-MM-dd";
 
     public static void printDivider(String text){
         System.out.println(divider + text + divider);
@@ -28,5 +36,61 @@ public class Utils {
     public static void clearConsole() {
         System.out.print("\033[H\033[2J");
         System.out.flush();
+    }
+
+    public static void printTable(String[] columnNames, ArrayList<ArrayList<Object>> data){
+        Object[][] objectArray = data.stream().map(u -> u.toArray(new Object[0])).toArray(Object[][]::new);
+        TextTable tt = new TextTable(columnNames, objectArray);
+        tt.printTable();
+    }
+
+    public static Date addDays(Date date, int days)
+    {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        cal.add(Calendar.DATE, days);
+        return cal.getTime();
+    }
+
+    public static Date getToday()
+    {
+        return new Date();
+    }
+
+    public static String formatDateToString(Date date)
+    {
+        SimpleDateFormat sdf = new SimpleDateFormat(sdfPattern);
+        return sdf.format(date);
+    }
+
+    public static Date formatStringToDate(String dateString)
+    {
+        try{
+            SimpleDateFormat sdf = new SimpleDateFormat(sdfPattern);
+            return sdf.parse(dateString);
+        }catch (Exception e){
+            return null;
+        }
+    }
+
+    public static String getTodayString(){
+        return formatDateToString(getToday());
+    }
+
+    public static String repeatString(String s, int num){
+        StringBuilder newString = new StringBuilder();
+        for (int i = 0; i < num - 1; i++){
+            newString.append(s).append(", ");
+        }
+        newString.append(s);
+        return newString.toString();
+    }
+
+    public static boolean IsWithinDate(Date Ostart, Date Oend, Date start, Date end) {
+        return start.after(Ostart) && end.before(Oend);
+    }
+
+    public static String formatAddress(Object [] addressInfo){
+        return String.format("%d %s, %s, %s", addressInfo);
     }
 }

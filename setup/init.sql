@@ -12,12 +12,32 @@ CREATE TABLE User (
     PRIMARY KEY(SIN)
 );
 
+CREATE TABLE Type (
+    ID INT AUTO_INCREMENT,
+    type VARCHAR(10) UNIQUE NOT NULL,            -- putting constraint for options in sql or code?
+
+    PRIMARY KEY(ID)
+);
+
 CREATE TABLE Listings (
     ID INT AUTO_INCREMENT,
-    type VARCHAR(10) NOT NULL,            -- putting constraint for options in sql or code?
     latitude DECIMAL(10, 8),            -- https://yeahexp.com/data-type-for-latitude-and-longitude/
     longitude DECIMAL(11, 8),               -- allowing NULLs
     PRIMARY KEY(ID)
+);
+
+CREATE TABLE ListingsType (
+    Listings_ID INT,
+    type_ID INT,            -- putting constraint for options in sql or code?
+
+    PRIMARY KEY(Listings_ID, type_ID),
+
+    FOREIGN KEY(Listings_ID) REFERENCES Listings(ID)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+    FOREIGN KEY(type_ID) REFERENCES Type(ID)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
 );
 
 CREATE TABLE RatedOnUser (
@@ -90,32 +110,39 @@ CREATE TABLE CommentsOnListing (
 );
 
 CREATE TABLE Amenities (
-    type VARCHAR(20),                   -- Constrain for length 
-    PRIMARY KEY(type)
+    ID INT AUTO_INCREMENT,
+    type VARCHAR(20) UNIQUE NOT NULL,                   -- Constrain for length
+    PRIMARY KEY(ID)
 );
 
 CREATE TABLE City (
-    name VARCHAR(20),                   -- Constrain for length 
-    PRIMARY KEY(name)
+    ID INT AUTO_INCREMENT,
+    name VARCHAR(20) NOT NULL UNIQUE,                   -- Constrain for length 
+    PRIMARY KEY(ID)
 );
 
 CREATE TABLE Country (
-    name VARCHAR(20),                   -- Constrain for length 
-    PRIMARY KEY(name)
+    ID INT AUTO_INCREMENT,
+    name VARCHAR(20) UNIQUE NOT NULL,                   -- Constrain for length 
+    PRIMARY KEY(ID)
 );
 
 CREATE TABLE Address (
+    ID INT AUTO_INCREMENT,
     postalcode Varchar(12), 
     street Text,
-    PRIMARY KEY(postalcode)
+    num INT,
+    
+    UNIQUE (postalcode, num),
+    PRIMARY KEY(ID)
 );
 
 CREATE TABLE ResidesIn (
-    Address_postalcode varchar(12),
+    Address_ID INT,
     User_SIN INT,
     PRIMARY KEY(User_SIN),
 
-    FOREIGN KEY (Address_postalcode) REFERENCES Address(postalcode)
+    FOREIGN KEY (Address_ID) REFERENCES Address(ID)
         ON DELETE CASCADE
         ON UPDATE CASCADE,
     FOREIGN KEY (User_SIN) REFERENCES User(SIN)
@@ -124,51 +151,51 @@ CREATE TABLE ResidesIn (
 );
 
 CREATE TABLE BelongsTo (
-    City_name varchar(20),
-    Country_name varchar(20),
-    PRIMARY KEY(City_name, Country_name),
+    City_ID INT,
+    Country_ID INT,
+    PRIMARY KEY(City_ID, Country_ID),
 
-    FOREIGN KEY (City_name) REFERENCES City(name)
+    FOREIGN KEY (City_ID) REFERENCES City(ID)
         ON DELETE CASCADE
         ON UPDATE CASCADE,
-    FOREIGN KEY (Country_name) REFERENCES Country(name)
+    FOREIGN KEY (Country_ID) REFERENCES Country(ID)
         ON DELETE CASCADE
         ON UPDATE CASCADE
 );
 
-CREATE TABLE IsIn (
-    Address_postalcode VARCHAR(12), 
-    City_name varchar(20),
-    PRIMARY KEY(Address_postalcode, City_name),
+CREATE TABLE IsIn (                 
+    Address_ID INT, 
+    City_ID INT,
+    PRIMARY KEY(Address_ID, City_ID),
 
-    FOREIGN KEY (Address_postalcode) REFERENCES Address(postalcode)
+    FOREIGN KEY (Address_ID) REFERENCES Address(ID)
         ON DELETE CASCADE
         ON UPDATE CASCADE,
 
-    FOREIGN KEY (City_name) REFERENCES City(name)
+    FOREIGN KEY (City_ID) REFERENCES City(ID)
         ON DELETE CASCADE
         ON UPDATE CASCADE
 );
 
 CREATE TABLE Has (
-    Amenities_type varchar(20),
+    Amenities_ID INT,
     Listing_ID INT,
-    PRIMARY KEY(Amenities_type, Listing_ID),
+    PRIMARY KEY(Amenities_ID, Listing_ID),
 
     FOREIGN KEY (Listing_ID) REFERENCES Listings(ID)
         ON DELETE CASCADE
         ON UPDATE CASCADE,
-    FOREIGN KEY (Amenities_type) REFERENCES Amenities(type)
+    FOREIGN KEY (Amenities_ID) REFERENCES Amenities(ID)
         ON DELETE CASCADE
         ON UPDATE CASCADE
 );
 
 CREATE TABLE LocatedIn (
-    Address_postalcode VARCHAR(12),
+    Address_ID INT,
     Listing_ID INT,
     PRIMARY KEY(Listing_ID),
 
-    FOREIGN KEY (Address_postalcode) REFERENCES Address(postalcode)
+    FOREIGN KEY (Address_ID) REFERENCES Address(ID)
         ON DELETE CASCADE
         ON UPDATE CASCADE,
 
@@ -181,7 +208,7 @@ CREATE TABLE LocatedIn (
 CREATE TABLE AvailableIn (
     Listing_ID INT,
     Period_ID INT,
-    price INT NOT NULL,
+    price DECIMAL(10,2) NOT NULL,
     PRIMARY KEY(Period_ID, Listing_ID),
 
     FOREIGN KEY (Listing_ID) REFERENCES Listings(ID)
@@ -208,13 +235,12 @@ CREATE TABLE Owns (
 );
 
 CREATE TABLE Books (
-    BookingID INT AUTO_INCREMENT,      -- just in case, but may not be neccesarily
+    BookingID INT AUTO_INCREMENT,      -- just in case, but may not be necessary
     Renter_SIN INT,
     Listing_ID INT,
-    start INT,
-    end INT,
-    isReserved BOOL,              -- may not be needed
-    Canceled BOOL,
+    start DATE NOT NULL,
+    end DATE NOT NULL,
+    isReserved BOOL,
     PRIMARY KEY(BookingID),
     
     FOREIGN KEY (Renter_SIN) REFERENCES User(SIN)
@@ -224,5 +250,14 @@ CREATE TABLE Books (
     FOREIGN KEY (Listing_ID) REFERENCES Listings(ID)
         ON DELETE SET NULL 
         ON UPDATE CASCADE
+);
+
+CREATE TABLE Cancelled (
+    BookingID INT,
+    date DATE,
+    PRIMARY KEY(BookingID),
+    FOREIGN KEY(BookingID) REFERENCES Books(BookingID)
+          ON DELETE CASCADE
+          ON UPDATE CASCADE
 );
 -- End

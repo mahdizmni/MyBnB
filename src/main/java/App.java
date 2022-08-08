@@ -1,26 +1,38 @@
+import java.sql.SQLException;
+import java.text.ParseException;
 import java.util.Scanner;
 
 public class App {
-    public static void main(String[] args){
+    static Scanner scan;
+    public static void main(String[] args) throws SQLException, ParseException {
         MySQLObj sqlObj = MySQLObj.getInstance();
-
-        Scanner scan = new Scanner(System.in);
+        scan = new Scanner(System.in);
         User user = null;
         boolean exit = false;
         while(!exit && user == null){
-            Utils.printMenu("Register/Login", new String[]{"Register", "Login"});
+            Utils.printMenu("Register/Login", new String[]{"Register", "Login", "Reports"});
             String userInput = scan.nextLine();
             switch (userInput) {
-                case "1"-> Register.register();
-                case "2"-> user = Login.login();
-                case "q" -> exit = true;
+                case "1":
+                    Register.register();
+                    break;
+                case "2":
+                    user = Login.login();
+                    break;
+                case "3":
+                    Reports reports = new Reports();
+                    reports.mainLoop();
+                    break;
+                case "q":
+                    exit = true;
+                    break;
             }
         }
         Utils.printInfo("Login Successful!");
 
         exit = false;
         while(!exit){
-            Utils.printMenu("Renter/Host", new String[]{"Renter", "Host"});
+            Utils.printMenu("Renter/Host/Search", new String[]{"Renter", "Host", "Search"});
             String userInput = scan.nextLine();
             switch (userInput) {
                 case "1":
@@ -32,6 +44,10 @@ public class App {
                     assert user != null;
                     Host host = new Host(user);
                     host.mainLoop();
+                    break;
+                case "3":
+                    Search search = new Search();
+                    search.mainLoop();
                     break;
                 case "q":
                     exit = true;
