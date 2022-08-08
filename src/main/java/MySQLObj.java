@@ -312,6 +312,80 @@ public class MySQLObj {
         return preparedQuery.executeQuery();
     }
 
+    public static ResultSet searchByCoordinates(double searchLat, double searchLon, Object obj) throws SQLException {
+        if(obj.getClass() != Search.class){
+            return null;
+        }
+        Search sObj = (Search) obj;
+
+        String baseQuery = "SELECT DISTINCT ai.Listing_ID, a.*, ci.name, AVG(Price) as avgPrice,\n" +
+                           "    ST_Distance_Sphere(point(?, ?),point(l.longitude, l.latitude))*0.00099978624 AS distance\n" +
+                           "FROM AvailableIn AS ai\n" +
+                           "JOIN Period AS p ON ai.Period_ID = p.ID\n" +
+                           "JOIN Listings AS l ON l.ID = ai.Listing_ID\n" +
+                           "JOIN LocatedIn AS li ON ai.Listing_ID = li.Listing_ID\n" +
+                           "JOIN Address AS a ON li.Address_ID = a.ID\n" +
+                           "JOIN IsIn AS ii ON ii.Address_ID = a.ID\n" +
+                           "JOIN City AS ci ON ii.City_ID = ci.ID\n" +
+                           "JOIN BelongsTo AS bo ON bo.City_ID = ci.ID\n" +
+                           "JOIN Country AS co ON co.ID = bo.Country_ID\n" +
+                           "JOIN Owns AS o ON o.Listing_ID = li.Listing_ID\n" +
+                           "WHERE EXISTS(\n" +
+                           "        SELECT *\n" +
+                           "        FROM AvailableIn AS ai2\n" +
+                           "        WHERE ai2.Listing_ID = ai.Listing_ID AND price BETWEEN ? AND ?\n" +
+                           "    )\n" +
+                           "    AND EXISTS(\n" +
+                           "        SELECT *\n" +
+                           "        FROM AvailableIn AS ai2\n" +
+                           "        Join Period AS p2 ON ai2.Period_ID = p2.ID\n" +
+                           "        WHERE ai2.Listing_ID = ai.Listing_ID\n" +
+                           "              AND (p2.start BETWEEN DATE(?) AND DATE(?))\n" +
+                           "              AND (p2.end BETWEEN DATE(?) AND DATE(?))\n" +
+                           "    )\n" +
+                           "    %s\n" +
+                           "GROUP BY ai.Listing_ID, ci.name\n" +
+                           "HAVING distance < ?\n" +
+                           "ORDER BY distance ASC" + "%s";
+
+        String orderByString = "";
+        String amenitiesQueryString = "";
+        if (sObj.priceSort.equals("ASC") || sObj.priceSort.equals("DESC")){
+            orderByString += ", avgPrice " + sObj.priceSort;
+        }
+
+        if(!sObj.amenitiesList.isEmpty()){
+            amenitiesQueryString = "AND EXISTS(\n" +
+                                   "    SELECT DISTINCT type\n" +
+                                   "    FROM AvailableIn AS ai2\n" +
+                                   "    JOIN Has AS h ON h.Listing_ID = ai2.Listing_ID\n" +
+                                   "    JOIN Amenities AS amen ON h.Amenities_ID = amen.ID\n" +
+                                   "    WHERE ai2.Listing_ID = ai.Listing_ID AND amen.type IN (" +
+                                   Utils.repeatString("?", sObj.amenitiesList.size()) + ")\n" +
+                                   ")";
+        }
+
+        baseQuery = String.format(baseQuery, amenitiesQueryString, orderByString);
+        System.out.println(baseQuery);
+        sObj.viewAllFilterOptions();
+        PreparedStatement preparedQuery = con.prepareStatement(baseQuery);
+        preparedQuery.setDouble(1, searchLon);
+        preparedQuery.setDouble(2, searchLat);
+        preparedQuery.setDouble(3, sObj.priceRange[0]);
+        preparedQuery.setDouble(4, sObj.priceRange[1]);
+        preparedQuery.setString(5, sObj.dateRange[0]);
+        preparedQuery.setString(6, sObj.dateRange[1]);
+        preparedQuery.setString(7, sObj.dateRange[0]);
+        preparedQuery.setString(8, sObj.dateRange[1]);
+        int count = 9;
+        for (String amenities: sObj.amenitiesList) {
+            preparedQuery.setString(count, amenities);
+            count ++;
+        }
+        preparedQuery.setDouble(count, sObj.distance);
+        return preparedQuery.executeQuery();
+    }
+
     public static boolean checkIfAddressIsValid(String address) throws SQLException {
         String query = """
                 SELECT *

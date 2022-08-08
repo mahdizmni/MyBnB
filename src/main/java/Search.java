@@ -5,7 +5,7 @@ import java.util.Scanner;
 
 public class Search {
 
-    public int distance = 5;
+    public double distance = 10.0;
     public String priceSort = "NONE";
     public ArrayList<String> amenitiesList;
     public double[] priceRange = {50.0, 200.0};
@@ -58,7 +58,7 @@ public class Search {
     public void setDistanceOption(){
         Scanner scan = new Scanner(System.in);
         System.out.print("Please enter a valid distance: ");
-        this.distance = scan.nextInt();
+        this.distance = scan.nextDouble();
         System.out.println("");
         Utils.printInfo("Successfully updated distance option");
     }
@@ -174,7 +174,42 @@ public class Search {
     public void searchListingByPostalCode(){
         System.out.println("Search listing by postal code");
     }
-    public void searchListingByCoordinates(){
-        System.out.println("Search listing by coordinates");
+    public void searchListingByCoordinates() throws SQLException {
+        Scanner scan = new Scanner(System.in);
+        System.out.print("Please enter a valid latitude: ");
+        double searchLat = scan.nextDouble();
+        System.out.print("Please enter a valid longitude: ");
+        double searchLon = scan.nextDouble();
+
+        ArrayList<ArrayList<Object>> sbcList = new ArrayList<>();
+        ResultSet sbcrs = null;
+        try{
+            sbcrs = MySQLObj.searchByCoordinates(searchLat, searchLon, this);
+            while (sbcrs.next()) {
+                ArrayList<Object> sbcData = new ArrayList<Object>();
+                sbcData.add(sbcrs.getInt("Listing_ID"));
+                String address = Utils.formatAddress(
+                        new Object[]{
+                                sbcrs.getInt("num"),
+                                sbcrs.getString("street"),
+                                sbcrs.getString("ci.name"),
+                                sbcrs.getString("postalcode")
+                        }
+                );
+                sbcData.add(address);
+                sbcData.add(sbcrs.getDouble("avgPrice"));
+                sbcData.add(sbcrs.getDouble("distance"));
+                sbcList.add(sbcData);
+            }
+            if(!sbcList.isEmpty()){
+                Utils.printTable(new String[]{"Listing ID", "Address", "Average Price", "Distance"}, sbcList);
+            }
+            else{
+                Utils.printInfo("No listings match the given criteria. Please try again.");
+            }
+        }
+        catch (Exception e){
+            Utils.printError("Something went wrong!", e.getMessage());
+        }
     }
 }
