@@ -1,9 +1,0 @@
-INSERT INTO Type VALUES(1, 'Apartment');
-INSERT INTO Type VALUES(2, 'House');
-INSERT INTO Type VALUES(3, 'Room');
-INSERT INTO Type VALUES(4, 'Bungalow');
-INSERT INTO Type VALUES(5, 'Townhouse');
-INSERT INTO Type VALUES(6, 'Condo');
-INSERT INTO Type VALUES(7, 'Castle');
-INSERT INTO Type VALUES(8, 'Cabin');
-INSERT INTO Type VALUES(9, 'Cottage');
