@@ -7,7 +7,7 @@ import java.util.Date;
 public class MySQLObj {
     private final String uriDb = "jdbc:mysql://localhost:3306/MyBnB";
     private final String username = "root";
-    private final String password = "";
+    private final String password = "Mz2468!0";
     private static Connection con;
     private static Statement st;
     private static MySQLObj instance = null;
