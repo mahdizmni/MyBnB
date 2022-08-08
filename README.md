@@ -11,10 +11,11 @@ CSCC43 Course Project
 - [x] ER Diagram + Schemas, July 3rd
 - [x] SQL setup - Mahdi, July 20
 - [x] Java setup - Peter, July 20
-- [ ] Change ER and Schema according to init.sql (not urgent)
+- [x] Change ER and Schema according to init.sql (not urgent)
 - [x] Decide on how we want to handle foreign key manipulations on delete
-- [ ] Renter Class - Peter
-- [ ] Host Class - Mahdi
-- [ ] Report
+- [x] Renter Class - Peter
+- [x] Host Class - Mahdi
+- [x] Report - Mahdi
+- [x] Search - Peter
 - [ ] Host toolkit
 - [x] Sample Data to bulk load db - Peter
