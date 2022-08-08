@@ -20,7 +20,8 @@ public class Host extends User{
                             "Update price of listing",
                             "Update availability of listing",
                             "Get history of past renters",
-                            "Comment on past renters"});
+                            "Comment on past renters",
+                            "Rate past renters"});
             String userInput = scan.nextLine();
             switch (userInput) {
                 case "1"-> createListing();
@@ -30,6 +31,7 @@ public class Host extends User{
                 case "5"-> updateAvailability();
                 case "6"-> getHistory();
                 case "7"-> comment();
+                case "8"-> rate();
                 case "q" -> exit = true;
             }
         }
@@ -244,6 +246,7 @@ public class Host extends User{
 
         if (!MySQLObj.UpdatePrice(listing_id, period_id, price)){
             Utils.printInfo("Price update was unsuccessful.");
+            return;
         }
         Utils.printInfo("Successfully updated price!");
     }
@@ -335,6 +338,7 @@ public class Host extends User{
         String comment = input.nextLine();
         if (!MySQLObj.CommentsOnUser(getSin(), renter_sin, comment)){
             Utils.printInfo("Comment was unsuccessful.");
+            return;
         }
         Utils.printInfo("Successfully commented on User.");
     }
@@ -360,6 +364,7 @@ public class Host extends User{
         int rate = Integer.parseInt(input.nextLine());
         if (!MySQLObj.RatesOnUser(getSin(), renter_sin, rate)){
             Utils.printInfo("Rating was unsuccessful.");
+            return;
         }
         Utils.printInfo("Successfully rated User.");
     }

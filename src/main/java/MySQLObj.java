@@ -403,7 +403,7 @@ public class MySQLObj {
         ResultSet rs = null;
         try {
             String query = """
-                    SELECT o.Listing_ID, b.Renter_SIN, o.start, o.end FROM
+                    SELECT o.Listing_ID, b.Renter_SIN, b.start, b.end FROM
                     Owns AS o JOIN Books AS b ON o.Listing_ID = b.Listing_ID
                     WHERE b.isReserved = True AND o.Listing_ID IN (SELECT Listing_ID FROM OWNS
                                                                     WHERE Host_SIN = ?);
@@ -1163,15 +1163,23 @@ public class MySQLObj {
             String lastyear = Utils.formatDateToString(Utils.addDays(Utils.getToday(), -365));
 
             String query = """
-                    SELECT b.Renter_SIN, COUNT(b.Renter_SIN) AS "cancellations" FROM
-                    Books AS b JOIN Canceled AS c ON c.BookingID = b.BookingID
-                    WHERE b.start >= ? AND b.end <= ?
-                    GROUP BY b.Renter_SIN
-                    ORDER BY cancellations DESC;
+                    SELECT Host_SIN FROM (
+                    SELECT o.Host_SIN, COUNT(o.Host_SIN) AS "cancellations" FROM
+                    Owns AS o JOIN Books AS b ON b.Listing_ID = o.Listing_ID
+                    JOIN Canceled c on b.BookingID = c.BookingID
+                    WHERE c.date >= ? AND c.date <= ?
+                    GROUP BY o.Host_SIN
+                    HAVING cancellations >= ALL (SELECT COUNT(o.Host_SIN) AS "cancellations" FROM
+                    Owns AS o JOIN Books AS b ON b.Listing_ID = o.Listing_ID
+                    JOIN Canceled c on b.BookingID = c.BookingID
+                    WHERE c.date >= ? AND c.date <= ?
+                    GROUP BY o.Host_SIN)) r ;
                     """;
             PreparedStatement ps = con.prepareStatement(query);
             ps.setString(1, lastyear);
             ps.setString(2, today);
+            ps.setString(3, lastyear);
+            ps.setString(4, today);
             rs = ps.executeQuery();
             return rs;
         } catch (SQLException e) {
@@ -1208,16 +1216,22 @@ public class MySQLObj {
             String lastyear = Utils.formatDateToString(Utils.addDays(Utils.getToday(), -365));
 
             String query = """
-                    SELECT o.Host_SIN, COUNT(o.Host_SIN) AS "cancellations" FROM
-                    Owns AS o JOIN Books As b ON b.Listing_ID = o.Listing_ID
-                    JOIN Canceled AS c ON c.BookingId = b.BookingID
-                    WHERE b.start >= ? AND b.end <= ?
-                    GROUP BY o.Host_SIN
-                    ORDER BY cancellations DESC;
+                    SELECT Renter_SIN FROM (
+                    SELECT b.Renter_SIN, COUNT(b.Renter_SIN) AS "cancellations" FROM
+                    Books AS b JOIN Canceled AS c ON c.BookingID = b.BookingID
+                    WHERE c.date >= ? AND c.date <= ?
+                    GROUP BY b.Renter_SIN
+                    HAVING cancellations >= ALL (SELECT COUNT(b.Renter_SIN) AS "cancellations" FROM
+                    Books AS b JOIN Canceled AS c ON c.BookingID = b.BookingID
+                    WHERE c.date >= ? AND c.date <= ?
+                    GROUP BY b.Renter_SIN)) r ;
+                                                
                     """;
             PreparedStatement ps = con.prepareStatement(query);
             ps.setString(1, lastyear);
             ps.setString(2, today);
+            ps.setString(3, lastyear);
+            ps.setString(4, today);
             rs = ps.executeQuery();
             return rs;
         } catch (SQLException e) {
