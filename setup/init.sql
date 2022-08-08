@@ -251,4 +251,13 @@ CREATE TABLE Books (
         ON DELETE SET NULL 
         ON UPDATE CASCADE
 );
+
+CREATE TABLE Cancelled (
+    BookingID INT,
+    date DATE,
+    PRIMARY KEY(BookingID),
+    FOREIGN KEY(BookingID) REFERENCES Books(BookingID)
+          ON DELETE CASCADE
+          ON UPDATE CASCADE
+);
 -- End

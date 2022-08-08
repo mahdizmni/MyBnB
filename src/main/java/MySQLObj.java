@@ -181,6 +181,14 @@ public class MySQLObj {
         preparedQuery.setInt(1, ID);
         preparedQuery.setInt(2, renter_sin);
         preparedQuery.executeUpdate();
+
+        String query2 = """
+                INSERT INTO Cancelled (BookingID, date) VALUES (?, ?);
+                """;
+        PreparedStatement preparedQuery2 = con.prepareStatement(query2);
+        preparedQuery2.setInt(1, ID);
+        preparedQuery2.setString(2, Utils.getTodayString());
+        preparedQuery2.executeUpdate();
     }
 
     public static Boolean checkIfRenterCreatedBooking(int ID, int renter_sin) throws SQLException {
