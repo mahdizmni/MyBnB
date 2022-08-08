@@ -981,7 +981,7 @@ public class MySQLObj {
             ps.setInt(1, booking_id);
             String today = Utils.getTodayString();
             query = """
-                    INSERT INTO Canceled VALUES(?, ?);
+                    INSERT INTO Cancelled VALUES(?, ?);
                     """;
             ps = con.prepareStatement(query);
             ps.setInt(1, booking_id);
@@ -1007,7 +1007,7 @@ public class MySQLObj {
                 listingData.add(listings.getBoolean("isReserved"));
                 listingsList.add(listingData);
             }
-            Utils.printTable(new String[]{"Listing ID", "first name", "last name", "start", "end", "Did not get canceled"},listingsList);
+            Utils.printTable(new String[]{"Listing ID", "first name", "last name", "start", "end", "Did not get cancelled"},listingsList);
         }
         catch (Exception e){
             Utils.printError("Something went wrong!", e.getMessage());
@@ -1605,6 +1605,44 @@ public class MySQLObj {
         }
     }
 
+    public static ResultSet GetPopularNounPhrase() {
+        ResultSet rs = null;
+        try {
+            String query = """
+                    SELECT Country.name, City.name AS "city", COUNT(l.ID) AS "# of Listing" FROM
+                    Listings AS l JOIN LocatedIn AS lo ON   lo.Listing_ID = l.ID
+                    JOIN IsIn ON IsIn.Address_ID = lo.Address_ID
+                    JOIN BelongsTo ON BelongsTo.City_ID = IsIn.City_ID
+                    JOIN Country ON Country.ID = BelongsTo.Country_ID
+                    JOIN City ON City.ID = IsIn.City_ID
+                    GROUP BY Country.name, City.name;
+                    """;
+            PreparedStatement ps = con.prepareStatement(query);
+            rs = ps.executeQuery();
+            return rs;
+        } catch (SQLException e) {
+            return rs;
+        }
+    }
+
+    public static void ViewPopularNounPhrase() {
+        ArrayList<ArrayList<Object>> listingsList = new ArrayList<>();
+        ResultSet listings = null;
+        try {
+            listings = GetPopularNounPhrase();
+            while (listings.next()) {
+                ArrayList<Object> listingData = new ArrayList<Object>();
+                listingData.add(listings.getString("name"));
+                listingData.add(listings.getString("city"));
+                listingData.add(listings.getString("# of Listing"));
+                listingsList.add(listingData);
+            }
+            Utils.printTable(new String[]{"Country", "City", "# of Listings"}, listingsList);
+        } catch (Exception e) {
+            Utils.printError("Something went wrong!", e.getMessage());
+        }
+    }
+
     public static ResultSet LargestCancellationsHosts() {
         ResultSet rs = null;
         try {
@@ -1615,12 +1653,12 @@ public class MySQLObj {
                     SELECT Host_SIN FROM (
                     SELECT o.Host_SIN, COUNT(o.Host_SIN) AS "cancellations" FROM
                     Owns AS o JOIN Books AS b ON b.Listing_ID = o.Listing_ID
-                    JOIN Canceled c on b.BookingID = c.BookingID
+                    JOIN Cancelled c on b.BookingID = c.BookingID
                     WHERE c.date >= ? AND c.date <= ?
                     GROUP BY o.Host_SIN
                     HAVING cancellations >= ALL (SELECT COUNT(o.Host_SIN) AS "cancellations" FROM
                     Owns AS o JOIN Books AS b ON b.Listing_ID = o.Listing_ID
-                    JOIN Canceled c on b.BookingID = c.BookingID
+                    JOIN Cancelled c on b.BookingID = c.BookingID
                     WHERE c.date >= ? AND c.date <= ?
                     GROUP BY o.Host_SIN)) r ;
                     """;
@@ -1667,11 +1705,11 @@ public class MySQLObj {
             String query = """
                     SELECT Renter_SIN FROM (
                     SELECT b.Renter_SIN, COUNT(b.Renter_SIN) AS "cancellations" FROM
-                    Books AS b JOIN Canceled AS c ON c.BookingID = b.BookingID
+                    Books AS b JOIN Cancelled AS c ON c.BookingID = b.BookingID
                     WHERE c.date >= ? AND c.date <= ?
                     GROUP BY b.Renter_SIN
                     HAVING cancellations >= ALL (SELECT COUNT(b.Renter_SIN) AS "cancellations" FROM
-                    Books AS b JOIN Canceled AS c ON c.BookingID = b.BookingID
+                    Books AS b JOIN Cancelled AS c ON c.BookingID = b.BookingID
                     WHERE c.date >= ? AND c.date <= ?
                     GROUP BY b.Renter_SIN)) r ;
                                                 

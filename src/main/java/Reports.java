@@ -38,7 +38,7 @@ public class Reports {
                 case "10"-> RankRentersByBookingInPeriodPerCity();
                 case "11"-> MySQLObj.ViewLargestCancellationsHosts();
                 case "12"-> MySQLObj.ViewLargestCancellationsRenters();
-                case "13"-> DisplayMostPopularNPForListing();
+                case "13"-> MySQLObj.ViewPopularNounPhrase();
                 case "q" -> exit = true;
             }
         }
@@ -85,9 +85,6 @@ public class Reports {
 
         MySQLObj.ViewRankRentersByBookingInPeriodPerCity(start, end);
 
-    }
-
-    public void DisplayMostPopularNPForListing() {
     }
 
 }
