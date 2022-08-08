@@ -13,9 +13,9 @@ public class Search {
 
     public Search() {
         amenitiesList = new ArrayList<>();
-        // default days are today and today + 30 days
+        // default days are today and today + 365 days
         String defaultStartDate = Utils.formatDateToString(Utils.getToday());
-        String defaultEndDate = Utils.formatDateToString(Utils.addDays(Utils.getToday(), 30));
+        String defaultEndDate = Utils.formatDateToString(Utils.addDays(Utils.getToday(), 365));
         dateRange = new String[]{defaultStartDate, defaultEndDate};
     }
 
@@ -172,7 +172,44 @@ public class Search {
         }
     }
     public void searchListingByPostalCode(){
-        System.out.println("Search listing by postal code");
+        Scanner scan = new Scanner(System.in);
+        System.out.print("Please enter a valid postal code with a space (e.g. M2N 6Z4): ");
+        String userPostalCode = scan.nextLine();
+
+        if (userPostalCode.length() != 7){
+            Utils.printInfo("Postal code is not valid.");
+            return;
+        }
+
+        ArrayList<ArrayList<Object>> sbpcList = new ArrayList<>();
+        ResultSet sbpcrs = null;
+        try{
+            sbpcrs = MySQLObj.searchByPostalCode(userPostalCode, this);
+            while (sbpcrs.next()) {
+                ArrayList<Object> sbpcData = new ArrayList<Object>();
+                sbpcData.add(sbpcrs.getInt("Listing_ID"));
+                String address = Utils.formatAddress(
+                        new Object[]{
+                                sbpcrs.getInt("num"),
+                                sbpcrs.getString("street"),
+                                sbpcrs.getString("ci.name"),
+                                sbpcrs.getString("postalcode")
+                        }
+                );
+                sbpcData.add(address);
+                sbpcData.add(sbpcrs.getDouble("avgPrice"));
+                sbpcList.add(sbpcData);
+            }
+            if(!sbpcList.isEmpty()){
+                Utils.printTable(new String[]{"Listing ID", "Address", "Average Price"}, sbpcList);
+            }
+            else{
+                Utils.printInfo("No listings match the given criteria. Please try again.");
+            }
+        }
+        catch (Exception e){
+            Utils.printError("Something went wrong!", e.getMessage());
+        }
     }
     public void searchListingByCoordinates() throws SQLException {
         Scanner scan = new Scanner(System.in);
