@@ -7,7 +7,7 @@ import java.util.Date;
 public class MySQLObj {
     private final String uriDb = "jdbc:mysql://localhost:3306/MyBnB";
     private final String username = "root";
-    private final String password = "Mz2468!0";
+    private final String password = "";
     private static Connection con;
     private static Statement st;
     private static MySQLObj instance = null;
@@ -79,9 +79,10 @@ public class MySQLObj {
 
     public static void addToListings(double latitude, double longitude) throws SQLException {
         try {
-            String query = "INSERT INTO Listings(latitude, longitude) VALUES (%f, %f)";
-            query = String.format(query, latitude, longitude);
+            String query = "INSERT INTO Listings(latitude, longitude) VALUES (?, ?)";
             PreparedStatement ps = con.prepareStatement(query);
+            ps.setDouble(1, latitude);
+            ps.setDouble(2, longitude);
             ps.executeUpdate();
         } catch (SQLException e) {
 //            System.out.println(e.getMessage());
@@ -96,167 +97,147 @@ public class MySQLObj {
             rs.next();
             return rs.getInt(1);
         } catch (SQLException e) {
- //           System.out.println(e.getMessage());
             return -1;
         }
     }
 
     public static boolean addToCountry(String country) {
         try {
-            String query = "INSERT INTO Country (name) VALUES ('%s')";
-            query = String.format(query, country);
+            String query = "INSERT INTO Country (name) VALUES (?)";
             PreparedStatement ps = con.prepareStatement(query);
+            ps.setString(1, country);
             ps.executeUpdate();
             return true;
         } catch (SQLException e) {
-  //          System.out.println(e.getMessage());
             return false;
         }
     }
     public static boolean addToCity(String city) {
         try {
-            String query = "INSERT INTO City (name) VALUES ('%s')";
-            query = String.format(query, city);
+            String query = "INSERT INTO City (name) VALUES (?)";
             PreparedStatement ps = con.prepareStatement(query);
+            ps.setString(1, city);
             ps.executeUpdate();
             return true;
         } catch (SQLException e ) {
-   //         System.out.println(e.getMessage());
             return false;
         }
     }
     public static boolean addToAddress(String postalcode, String street, int num) {
         try {
-            String query = "INSERT INTO Address(postalcode, street, num) VALUES('%s', '%s', %d)";
-            query = String.format(query, postalcode, street, num);
+            String query = "INSERT INTO Address (postalcode, street, num) VALUES(?, ?, ?)";
             PreparedStatement ps = con.prepareStatement(query);
+            ps.setString(1, postalcode);
+            ps.setString(2, street);
+            ps.setInt(3, num);
             ps.executeUpdate();
             return true;
         } catch (SQLException e) {
-    //        System.out.println(e.getMessage());
             return false;
         }
     }
     public static boolean addToType(String type) throws SQLException {
         try {
-            String query = "INSERT INTO Type (type) VALUES ('%s')";
-            query = String.format(query, type);
+            String query = "INSERT INTO Type (type) VALUES (?)";
             PreparedStatement ps = con.prepareStatement(query);
+            ps.setString(1, type);
             ps.executeUpdate();
             return true;
         } catch (SQLException e) {
-     //       System.out.println(e.getMessage());
             return false;
         }
     }
     public static void addToListingsType(int listings_id, int type_id) throws SQLException {
-        try {
-            String query = "INSERT INTO ListingsType VALUES (%d, %d)";
-            query = String.format(query, listings_id, type_id);
-            PreparedStatement ps = con.prepareStatement(query);
-            ps.executeUpdate();
-        } catch (SQLException e) {
-     //       System.out.println(e.getMessage());
-        }
+        String query = "INSERT INTO ListingsType VALUES (?, ?)";
+        PreparedStatement ps = con.prepareStatement(query);
+        ps.setInt(1, listings_id);
+        ps.setInt(2, type_id);
+        ps.executeUpdate();
     }
     public static void addToBelongsTo(int city_id, int country_id) throws SQLException {
-        try {
-            String query = "INSERT INTO BelongsTo VALUES ('%s', '%s')";
-            query = String.format(query, city_id, country_id);
-            PreparedStatement ps = con.prepareStatement(query);
-            ps.executeUpdate();
-        } catch (SQLException e) {
-       //     System.out.println(e.getMessage());
-        }
+        String query = "INSERT INTO BelongsTo VALUES (?, ?)";
+        PreparedStatement ps = con.prepareStatement(query);
+        ps.setInt(1, city_id);
+        ps.setInt(2, country_id);
+        ps.executeUpdate();
     }
     public static boolean addToAmenities(String name) throws SQLException {
         try {
-            String query = "INSERT INTO Amenities(type) VALUES ('%s')";
-            query = String.format(query, name);
+            String query = "INSERT INTO Amenities(type) VALUES (?)";
             PreparedStatement ps = con.prepareStatement(query);
+            ps.setString(1, name);
             ps.executeUpdate();
             return true;
         }
         catch (SQLException e) {
-        //    System.out.println(e.getMessage());
             return false;
         }
     }
     public static void addToLocatedIn(int address_id, int listing_id) throws SQLException {
-        try {
-            String query = "INSERT INTO LocatedIn VALUES (%d, %d)";
-            query = String.format(query, address_id, listing_id);
-            PreparedStatement ps = con.prepareStatement(query);
-            ps.executeUpdate();
-        }
-        catch (SQLException e) {
-         //   System.out.println(e.getMessage());
-        }
+        String query = "INSERT INTO LocatedIn VALUES (?, ?)";
+        PreparedStatement ps = con.prepareStatement(query);
+        ps.setInt(1, address_id);
+        ps.setInt(2, listing_id);
+        ps.executeUpdate();
     }
     public static void addToIsIn(int address_id, int city_id) throws SQLException {
-        try {
-            String query = "INSERT INTO IsIn VALUES (%d, %d)";
-            query = String.format(query, address_id, city_id);
-            PreparedStatement ps = con.prepareStatement(query);
-            ps.executeUpdate();
-        }
-        catch (SQLException e) {
-        //    System.out.println(e.getMessage());
-        }
+        String query = "INSERT INTO IsIn VALUES (?, ?)";
+        PreparedStatement ps = con.prepareStatement(query);
+        ps.setInt(1, address_id);
+        ps.setInt(2, city_id);
+        ps.executeUpdate();
     }
     public static boolean addToPeriod(int start, int end) throws SQLException {
         try {
-            String query = "INSERT INTO Period(start, end) VALUES (%d, %d)";
-            query = String.format(query, start, end);
+            String query = "INSERT INTO Period(start, end) VALUES (?, ?)";
             PreparedStatement ps = con.prepareStatement(query);
+            ps.setInt(1, start);
+            ps.setInt(2, end);
             ps.executeUpdate();
             return true;
         }
         catch (SQLException e) {
-         //   System.out.println(e.getMessage());
             return false;
         }
     }
     public static void addToHas(int amenities_id, int listing_id) throws SQLException {
-        try {
-        String query = "INSERT INTO Has VALUES (%d, %d)";
-        query = String.format(query, amenities_id, listing_id);
+        String query = "INSERT INTO Has VALUES (?, ?)";
         PreparedStatement ps = con.prepareStatement(query);
+        ps.setInt(1, amenities_id);
+        ps.setInt(2, listing_id);
         ps.executeUpdate();
-        } catch (SQLException e) {
-         //   System.out.println(e.getMessage());
-        }
     }
     public static boolean addToOwns(int host_sin, int listing_id) throws SQLException {
         try {
-            String query = "INSERT INTO Owns VALUES (%d, %d)";
-            query = String.format(query, host_sin, listing_id);
+            String query = "INSERT INTO Owns VALUES (?, ?)";
             PreparedStatement ps = con.prepareStatement(query);
+            ps.setInt(1, host_sin);
+            ps.setInt(2, listing_id);
             ps.executeUpdate();
             return true;
         } catch (SQLException e) {
-            //  System.out.println(e.getMessage());
             return false;
         }
     }
     public static boolean addToAvailableIn(int listing_id, int period_id, float price) throws SQLException {
         try {
-
-        String query = "INSERT INTO AvailableIn VALUES (%d, %d, %f)";
-        query = String.format(query, listing_id, period_id, price);
-        PreparedStatement ps = con.prepareStatement(query);
-        ps.executeUpdate();
-        return true;
+            String query = "INSERT INTO AvailableIn VALUES (?, ?, ?)";
+            PreparedStatement ps = con.prepareStatement(query);
+            ps.setInt(1, listing_id);
+            ps.setInt(2, period_id);
+            ps.setFloat(3, price);
+            ps.executeUpdate();
+            return true;
         } catch (SQLException e) {
-          //  System.out.println(e.getMessage());
             return false;
         }
     }
     public static int getPeriodID(int start, int end) throws SQLException {
         try {
-            String query = "SELECT ID FROM Period WHERE start = %d AND end = %d";
-            query = String.format(query, start, end);
+            String query = "SELECT ID FROM Period WHERE start = ? AND end = ?";
             PreparedStatement ps = con.prepareStatement(query);
+            ps.setInt(1, start);
+            ps.setInt(2, end);
             ResultSet rs = ps.executeQuery();
             rs.next();
             if (rs.next())
@@ -264,82 +245,78 @@ public class MySQLObj {
             else
                 return -1;
         } catch (SQLException e) {
-         //   System.out.println(e.getMessage());
             return -1;
         }
     }
     public static int getAddressID(String postalcode, int num) throws SQLException {
         try {
-        String query = "SELECT ID FROM Address WHERE postalcode = '%s' AND num = %d";
-        query = String.format(query, postalcode, num);
-        PreparedStatement ps = con.prepareStatement(query);
-        ResultSet rs = ps.executeQuery();
+            String query = "SELECT ID FROM Address WHERE postalcode = ? AND num = ?";
+            PreparedStatement ps = con.prepareStatement(query);
+            ps.setString(1, postalcode);
+            ps.setInt(2, num);
+            ResultSet rs = ps.executeQuery();
             rs.next();
-        return rs.getInt(1);
+            return rs.getInt(1);
         } catch (SQLException e) {
-//            System.out.println(e.getMessage());
             return -1;
         }
     }
     public static int getCountryID(String name) throws SQLException {
         try {
-            String query = "SELECT ID FROM Country WHERE name = '%s'";
-            query = String.format(query, name);
+            String query = "SELECT ID FROM Country WHERE name = ?";
             PreparedStatement ps = con.prepareStatement(query);
+            ps.setString(1, name);
             ResultSet rs = ps.executeQuery();
             rs.next();
             return rs.getInt(1);
         } catch (SQLException e) {
- //           System.out.println(e.getMessage());
             return -1;
         }
     }
     public static int getAmenitiesID(String name) throws SQLException {
         try {
-            String query = "SELECT ID FROM Amenities WHERE type = '%s'";
-            query = String.format(query, name);
+            String query = "SELECT ID FROM Amenities WHERE type = ?";
             PreparedStatement ps = con.prepareStatement(query);
+            ps.setString(1, name);
             ResultSet rs = ps.executeQuery();
             rs.next();
             return rs.getInt(1);
         } catch (SQLException e) {
-  //          System.out.println(e.getMessage());
             return -1;
         }
     }
     public static int getCityID(String name) throws SQLException {
         try {
-            String query = "SELECT ID FROM City WHERE name = '%s'";
-            query = String.format(query, name);
+            String query = "SELECT ID FROM City WHERE name = ?";
             PreparedStatement ps = con.prepareStatement(query);
+            ps.setString(1, name);
             ResultSet rs = ps.executeQuery();
             rs.next();
             return rs.getInt(1);
         } catch (SQLException e) {
-   //         System.out.println(e.getMessage());
             return -1;
         }
     }
     public static int getTypeID(String name) throws SQLException {
         try {
-            String query = "SELECT ID FROM Type WHERE type = '%s'";
-            query = String.format(query, name);
+            String query = "SELECT ID FROM Type WHERE type = ?";
             PreparedStatement ps = con.prepareStatement(query);
+            ps.setString(1, name);
             ResultSet rs = ps.executeQuery();
             rs.next();
             return rs.getInt(1);
         } catch (SQLException e)
         {
-    //        System.out.println(e.getMessage());
             return -1;
         }
     }
+
     public static ResultSet AllHostListings(int host_sin) {
         ResultSet rs = null;
         try {
             String query = """
                     SELECT Owns.Listing_ID FROM Owns
-                    WHERE Owns.Host_SIN = ?; 
+                    WHERE Owns.Host_SIN = ?;
                     """;
             PreparedStatement ps = con.prepareStatement(query);
             ps.setInt(1, host_sin);
@@ -370,8 +347,8 @@ public class MySQLObj {
         ResultSet rs = null;
         try {
             String query = """
-                    SELECT AvailableIn.Period_ID, Period.start, Period.end, AvailableIn.price 
-                    FROM AvailableIn JOIN Period ON Period.ID = AvailableIn.Period_ID 
+                    SELECT AvailableIn.Period_ID, Period.start, Period.end, AvailableIn.price
+                    FROM AvailableIn JOIN Period ON Period.ID = AvailableIn.Period_ID
                         JOIN Listings ON Listings.ID = AvailableIn.Listing_ID
                     WHERE Listings.ID = ?;
                     """;
@@ -397,7 +374,7 @@ public class MySQLObj {
                 listingData.add(listings.getFloat("price"));
                 listingsList.add(listingData);
             }
-            Utils.printTable(new String[]{"ID, start date, end date, price"},listingsList);
+            Utils.printTable(new String[]{"ID", "start date", "end date", "price"},listingsList);
         }
         catch (Exception e){
             Utils.printError("Something went wrong!", e.getMessage());
@@ -416,7 +393,7 @@ public class MySQLObj {
                 listingData.add(listings.getString("end"));
                 listingsList.add(listingData);
             }
-            Utils.printTable(new String[]{"Listing ID, User ID, start of reservation, end of reservation"},listingsList);
+            Utils.printTable(new String[]{"Listing ID", "User ID", "Start of reservation", "End of reservation"},listingsList);
         }
         catch (Exception e){
             Utils.printError("Something went wrong!", e.getMessage());
@@ -427,7 +404,7 @@ public class MySQLObj {
         try {
             String query = """
                     SELECT o.Listing_ID, b.Renter_SIN, o.start, o.end FROM
-                    Owns AS o JOIN Books AS b ON o.Listing_ID = b.Listing_ID 
+                    Owns AS o JOIN Books AS b ON o.Listing_ID = b.Listing_ID
                     WHERE b.isReserved = True AND o.Listing_ID IN (SELECT Listing_ID FROM OWNS
                                                                     WHERE Host_SIN = ?);
                     """;
@@ -446,7 +423,7 @@ public class MySQLObj {
             String query = """
                     SELECT DISTINCT Owns.Listing_ID, b.BookingID, b.start, b.end FROM
                     Owns JOIN Books AS b ON
-                    Owns.Listing_ID = b.Listing_ID 
+                    Owns.Listing_ID = b.Listing_ID
                     WHERE Owns.Host_SIN = ? AND b.isReserved = True;
                     """;
             PreparedStatement ps = con.prepareStatement(query);
@@ -461,7 +438,7 @@ public class MySQLObj {
     public static int PeriodIDToListingID(int period_id) {
         try {
             String query = """
-                    SELECT Listing_ID FROM AvailableIn 
+                    SELECT Listing_ID FROM AvailableIn
                     WHERE Period_ID = ?;
                     """;
             PreparedStatement ps = con.prepareStatement(query);
@@ -498,14 +475,14 @@ public class MySQLObj {
         try {
             String query = """
                     UPDATE Books
-                    set isReserved = False 
+                    set isReserved = False
                     WHERE BookingID = ?;
                     """;
             PreparedStatement ps = con.prepareStatement(query);
             ps.setInt(1, booking_id);
-            String today = Reports.getTodayString();
+            String today = Utils.getTodayString();
             query = """
-                    INSERT INTO Canceled VALUES(?, '?');
+                    INSERT INTO Canceled VALUES(?, ?);
                     """;
             ps = con.prepareStatement(query);
             ps.setInt(1, booking_id);
@@ -597,11 +574,7 @@ public class MySQLObj {
             PreparedStatement ps = con.prepareStatement(query);
             ps.setInt(1, listing_id);
             ps.setInt(2, host_sin);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next())
-                return true;
-            else
-                return false;
+            return ps.executeQuery().next();
         } catch (SQLException e) {
             System.out.println(e.getMessage());
             return false;
@@ -611,18 +584,14 @@ public class MySQLObj {
         try {
             String query = """
                     SELECT b.Renter_SIN FROM
-                    Books AS b JOIN Owns AS o ON b.Listing_ID = o.Listing_ID 
+                    Books AS b JOIN Owns AS o ON b.Listing_ID = o.Listing_ID
                     WHERE b.Renter_SIN = ? AND b.Listing_ID IN (SELECT Listing_ID FROM OWNS
                                                                     WHERE Host_SIN = ?)
                     """;
             PreparedStatement ps = con.prepareStatement(query);
             ps.setInt(1, renter_sin);
             ps.setInt(2, host_sin);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next())
-                return true;
-            else
-                return false;
+            return ps.executeQuery().next();
         } catch (SQLException e) {
             System.out.println(e.getMessage());
             return false;
@@ -636,11 +605,7 @@ public class MySQLObj {
                     """;
             PreparedStatement ps = con.prepareStatement(query);
             ps.setInt(1, listing_id);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next())
-                return true;
-            else
-                return false;
+            return ps.executeQuery().next();
         } catch (SQLException e) {
             System.out.println(e.getMessage());
             return false;
@@ -650,27 +615,21 @@ public class MySQLObj {
         try {
             String query = """
                     SELECT SIN FROM User
-                    WHERE SIN = ?; 
+                    WHERE SIN = ?;
                     """;
             PreparedStatement ps = con.prepareStatement(query);
             ps.setInt(1, sin);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next())
-                return true;
-            else
-                return false;
+            return ps.executeQuery().next();
         } catch (SQLException e) {
             System.out.println(e.getMessage());
             return false;
         }
     }
-    public static boolean IsWithinDate(Date Oend, Date start) {
-        return start.before(Oend);
-    }
+
     public static String GetEndDate (int period_ID) {
         try {
             String query = """
-                    SELECT end FROM Period 
+                    SELECT end FROM Period
                     WHERE ID = ?;
                     """;
             PreparedStatement ps = con.prepareStatement(query);
@@ -721,7 +680,7 @@ public class MySQLObj {
         try {
             String query = """
                     UPDATE AvailableIn
-                    SET price = ? 
+                    SET price = ?
                     WHERE Listing_ID = ? AND Period_ID = ?;
                     """;
             PreparedStatement ps = con.prepareStatement(query);
@@ -748,13 +707,13 @@ public class MySQLObj {
         }
 
         if (listingsList.size() == 0) { // no one has even attempted to book a place. free to update
-           return 0;
-       }
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+            return 0;
+        }
+        SimpleDateFormat sdf = new SimpleDateFormat(Utils.sdfPattern);
         for (int i = 0; i < listingsList.size(); i++) {
-           Date start = sdf.parse((String) listingsList.get(i).get(1));
-           Date end = sdf.parse((String) listingsList.get(i).get(0));
-           if (IsWithinDate(end, start))
+            Date start = sdf.parse((String) listingsList.get(i).get(1));
+            Date end = sdf.parse((String) listingsList.get(i).get(0));
+            if (Utils.IsWithinDate(end, start))
                 return -1;
         }
 
@@ -782,13 +741,14 @@ public class MySQLObj {
     }
     public static boolean CommentsOnUser(int user1, int user2, String text) throws SQLException {
         try {
-            String query = "INSERT INTO CommentsOnUser(User1_SIN, User2_SIN, text) VALUES (%d, %d, '%s')";
-            query = String.format(query, user1, user2, text);
+            String query = "INSERT INTO CommentsOnUser(User1_SIN, User2_SIN, text) VALUES (?, ?, ?)";
             PreparedStatement ps = con.prepareStatement(query);
+            ps.setInt(1, user1);
+            ps.setInt(2, user2);
+            ps.setString(3, text);
             ps.executeUpdate();
             return true;
         } catch (SQLException e) {
-            //  System.out.println(e.getMessage());
             return false;
         }
     }
@@ -811,20 +771,21 @@ public class MySQLObj {
     }
     public static boolean RatesOnUser(int user1, int user2, int score) throws SQLException {
         try {
-            String query = "INSERT INTO RatesOnUser(User1_SIN, User2_SIN, score) VALUES (%d, %d, %d)";
-            query = String.format(query, user1, user2, score);
+            String query = "INSERT INTO RatesOnUser(User1_SIN, User2_SIN, score) VALUES (?, ?, ?)";
             PreparedStatement ps = con.prepareStatement(query);
+            ps.setInt(1, user1);
+            ps.setInt(2, user2);
+            ps.setInt(3, score);
             ps.executeUpdate();
             return true;
         } catch (SQLException e) {
-            //  System.out.println(e.getMessage());
             return false;
         }
     }
     public static int CountBookings2(String postalcode, String city) {
         try {
             String query = """
-                    SELECT Count(b.BookingID) FROM 
+                    SELECT Count(b.BookingID) FROM
                     Books AS b JOIN LocatedIn AS l ON l.Listing_ID = b.Listing_ID
                     JOIN Address AS a ON a.ID = l.Address_ID
                     WHERE a.postalcode = ? AND City.name = ?;
@@ -836,7 +797,6 @@ public class MySQLObj {
             rs.next();
             return rs.getInt(1);
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
             return -1;
         }
     }
@@ -857,7 +817,6 @@ public class MySQLObj {
             rs.next();
             return rs.getInt(1);
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
             return -1;
         }
     }
@@ -866,14 +825,13 @@ public class MySQLObj {
         try {
             String query = """
                     SELECT o.Listing_ID, u.firstname, u.lastname, b.start, b.end, b.isReserved FROM
-                    Owns AS o JOIN Books AS b ON b.Listing_ID = o.Listing_ID 
+                    Owns AS o JOIN Books AS b ON b.Listing_ID = o.Listing_ID
                     JOIN User AS u ON u.SIN = b.Renter_SIN 
                     WHERE o.Host_SIN = ?; 
                     """;
             PreparedStatement ps = con.prepareStatement(query);
             ps.setInt(1, host_sin);
             rs = ps.executeQuery();
-
             return rs;
         } catch (SQLException e) {
             return rs;
@@ -888,7 +846,7 @@ public class MySQLObj {
                     JOIN IsIn ON IsIn.Address_ID = lo.Address_ID
                     JOIN BelongsTo ON BelongsTo.City_ID = IsIn.City_ID
                     JOIN Country ON Country.ID = BelongsTo.Country_ID
-                    JOIN City ON City.ID = IsIn.City_ID 
+                    JOIN City ON City.ID = IsIn.City_ID
                     JOIN Address ON IsIn.Address_ID = Address.ID
                     GROUP BY Country.name, City.name, Address.postalcode; 
                     """;
@@ -927,7 +885,7 @@ public class MySQLObj {
                     JOIN IsIn ON IsIn.Address_ID = lo.Address_ID
                     JOIN BelongsTo ON BelongsTo.City_ID = IsIn.City_ID
                     JOIN Country ON Country.ID = BelongsTo.Country_ID
-                    GROUP BY Country.name; 
+                    GROUP BY Country.name;
                     """;
             PreparedStatement ps = con.prepareStatement(query);
             rs = ps.executeQuery();
@@ -947,11 +905,10 @@ public class MySQLObj {
                     JOIN IsIn On IsIn.Address_ID = LocatedIn.Address_ID
                     JOIN City ON City.ID = IsIn.City_ID
                     GROUP BY u.email, City.name
-                    ORDER BY COUNT(o.Listing_ID) DESC; 
+                    ORDER BY COUNT(o.Listing_ID) DESC;
                     """;
             PreparedStatement ps = con.prepareStatement(query);
             rs = ps.executeQuery();
-
             return rs;
         } catch (SQLException e) {
             System.out.println(e.getMessage());
@@ -986,14 +943,12 @@ public class MySQLObj {
                     JOIN BelongsTo on BelongsTo.City_ID = IsIn.City_ID
                     JOIN Country on Country.ID = BelongsTo.Country_ID
                     GROUP BY u.email, Country.name
-                    ORDER BY COUNT(o.Listing_ID) DESC; 
+                    ORDER BY COUNT(o.Listing_ID) DESC;
                     """;
             PreparedStatement ps = con.prepareStatement(query);
             rs = ps.executeQuery();
-
             return rs;
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
             return rs;
         }
     }
@@ -1071,10 +1026,9 @@ public class MySQLObj {
             rs = ps.executeQuery();
             return rs;
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
             return rs;
         }
-        }
+    }
     public static void ViewCommercialHosts() {
         ArrayList<ArrayList<Object>> listingsList = new ArrayList<>();
         ResultSet listings = null;
@@ -1093,6 +1047,7 @@ public class MySQLObj {
             Utils.printError("Something went wrong!", e.getMessage());
         }
     }
+
     public static ResultSet CountListingsByCountryCity() {
         ResultSet rs = null;
         try {
@@ -1103,16 +1058,16 @@ public class MySQLObj {
                     JOIN BelongsTo ON BelongsTo.City_ID = IsIn.City_ID
                     JOIN Country ON Country.ID = BelongsTo.Country_ID
                     JOIN City ON City.ID = IsIn.City_ID
-                    GROUP BY Country.name, City.name; 
+                    GROUP BY Country.name, City.name;
                     """;
             PreparedStatement ps = con.prepareStatement(query);
             rs = ps.executeQuery();
             return rs;
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
             return rs;
         }
     }
+
     public static ResultSet RankRentersByBookingInPeriod(String start, String end) {
         ResultSet rs = null;
         try {
@@ -1127,10 +1082,8 @@ public class MySQLObj {
             ps.setString(1, start);
             ps.setString(2, end);
             rs = ps.executeQuery();
-
             return rs;
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
             return rs;
         }
     }
@@ -1150,11 +1103,12 @@ public class MySQLObj {
             Utils.printError("Something went wrong!", e.getMessage());
         }
     }
+
     public static ResultSet RankRentersByBookingInPeriodPerCity(String start, String end) {
         ResultSet rs = null;
         try {
-            String today = Reports.getTodayString();
-            String lastyear = Reports.addDays(Reports.getToday(), -365);
+            String today = Utils.getTodayString();
+            String lastyear = Utils.formatDateToString(Utils.addDays(Utils.getToday(), -365));
 
             // Condition : Renters with more at least 2 bookings withing last year
 
@@ -1178,13 +1132,12 @@ public class MySQLObj {
             ps.setString(3, lastyear);
             ps.setString(4, today);
             rs = ps.executeQuery();
-
             return rs;
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
             return rs;
         }
     }
+
     public static void ViewRankRentersByBookingInPeriodPerCity(String start, String end) {
         ArrayList<ArrayList<Object>> listingsList = new ArrayList<>();
         ResultSet listings = null;
@@ -1202,112 +1155,95 @@ public class MySQLObj {
             Utils.printError("Something went wrong!", e.getMessage());
         }
     }
-    public static ResultSet LargestCancelationsHosts() {
+
+    public static ResultSet LargestCancellationsHosts() {
         ResultSet rs = null;
         try {
-            String today = Reports.getTodayString();
-            String lastyear = Reports.addDays(Reports.getToday(), -365);
+            String today = Utils.getTodayString();
+            String lastyear = Utils.formatDateToString(Utils.addDays(Utils.getToday(), -365));
 
             String query = """
-                    SELECT b.Renter_SIN, COUNT(b.Renter_SIN) AS "cancelations" FROM
+                    SELECT b.Renter_SIN, COUNT(b.Renter_SIN) AS "cancellations" FROM
                     Books AS b JOIN Canceled AS c ON c.BookingID = b.BookingID
                     WHERE b.start >= ? AND b.end <= ?
                     GROUP BY b.Renter_SIN
-                    ORDER BY cancelations DESC;
+                    ORDER BY cancellations DESC;
                     """;
             PreparedStatement ps = con.prepareStatement(query);
             ps.setString(1, lastyear);
             ps.setString(2, today);
             rs = ps.executeQuery();
-
             return rs;
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
             return rs;
         }
     }
-    public static void ViewLargestCancelationsHosts() {
+    public static void ViewLargestCancellationsHosts() {
         ArrayList<ArrayList<Object>> listingsList = new ArrayList<>();
         ResultSet listings = null;
         try {
-            listings = LargestCancelationsHosts();
+            listings = LargestCancellationsHosts();
             if (listings == null) {
-                System.out.println("no one canceled anything!");
+                Utils.printInfo("No cancellations across all hosts.");
                 return;
             }
             while (listings.next()) {
-
                 ArrayList<Object> listingData = new ArrayList<Object>();
                 listingData.add(listings.getInt("Renter_SIN"));
-                listingData.add(listings.getInt("cancelatins"));
+                listingData.add(listings.getInt("cancellations"));
                 listingsList.add(listingData);
             }
             int renter_sin = (int) listingsList.get(0).get(0);
-            int renter_cancelations = (int) listingsList.get(0).get(1);
-
-
-
-
-
+            int renter_cancellations = (int) listingsList.get(0).get(1);
             Utils.printTable(new String[]{"User Email", "City", "# of Bookings"}, listingsList);
         } catch (Exception e) {
             Utils.printError("Something went wrong!", e.getMessage());
         }
     }
 
-    public static ResultSet LargestCancelationsRenters() {
+    public static ResultSet LargestCancellationsRenters() {
         ResultSet rs = null;
         try {
-            String today = Reports.getTodayString();
-            String lastyear = Reports.addDays(Reports.getToday(), -365);
+            String today = Utils.getTodayString();
+            String lastyear = Utils.formatDateToString(Utils.addDays(Utils.getToday(), -365));
 
             String query = """
-                    SELECT o.Host_SIN, COUNT(o.Host_SIN) AS "cancelations" FROM
+                    SELECT o.Host_SIN, COUNT(o.Host_SIN) AS "cancellations" FROM
                     Owns AS o JOIN Books As b ON b.Listing_ID = o.Listing_ID
                     JOIN Canceled AS c ON c.BookingId = b.BookingID
                     WHERE b.start >= ? AND b.end <= ?
                     GROUP BY o.Host_SIN
-                    ORDER BY cancelations DESC;
+                    ORDER BY cancellations DESC;
                     """;
             PreparedStatement ps = con.prepareStatement(query);
             ps.setString(1, lastyear);
             ps.setString(2, today);
             rs = ps.executeQuery();
-
             return rs;
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
             return rs;
         }
     }
-    public static void ViewLargestCancelationsRenters() {
+    public static void ViewLargestCancellationsRenters() {
         ArrayList<ArrayList<Object>> listingsList = new ArrayList<>();
         ResultSet listings = null;
         try {
-            listings = LargestCancelationsRenters();
+            listings = LargestCancellationsRenters();
             if (listings == null) {
-                System.out.println("no one canceled anything!");
+                Utils.printInfo("No cancellations across all renters.");
                 return;
             }
             while (listings.next()) {
-
                 ArrayList<Object> listingData = new ArrayList<Object>();
                 listingData.add(listings.getInt("Renter_SIN"));
-                listingData.add(listings.getInt("cancelatins"));
+                listingData.add(listings.getInt("cancellations"));
                 listingsList.add(listingData);
             }
             int renter_sin = (int) listingsList.get(0).get(0);
-            int renter_cancelations = (int) listingsList.get(0).get(1);
-
-
-
-
-
-                Utils.printTable(new String[]{"User Email", "City", "# of Bookings"}, listingsList);
+            int renter_cancellations = (int) listingsList.get(0).get(1);
+            Utils.printTable(new String[]{"User Email", "City", "# of Bookings"}, listingsList);
         } catch (Exception e) {
             Utils.printError("Something went wrong!", e.getMessage());
         }
     }
-
-
 }

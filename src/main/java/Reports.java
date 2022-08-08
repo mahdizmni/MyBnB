@@ -1,14 +1,9 @@
 import java.sql.SQLException;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.Scanner;
 
 
 public class Reports {
-
-
     public void mainLoop() throws SQLException, ParseException {
         Scanner scan = new Scanner(System.in);
         boolean exit = false;
@@ -53,31 +48,6 @@ public class Reports {
         if (res > -1)
             System.out.println("Number of Bookings in the specified date range and location: " + res);
     }
-
-    public static String sdfPattern = "yyyy-MM-dd";
-
-    public static Date getToday()
-    {
-        return new Date();
-    }
-
-    public static String formatDateToString(Date date)
-    {
-        SimpleDateFormat sdf = new SimpleDateFormat(sdfPattern);
-        return sdf.format(date);
-    }
-
-    public static String getTodayString(){
-        return formatDateToString(getToday());
-    }
-
-    public static String addDays(Date date, int days)
-    {
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(date);
-        cal.add(Calendar.DATE, days);
-        return formatDateToString(cal.getTime());
-    }
     public void ListingsNumberPerCountry() {
         MySQLObj.ViewCountListingsByCountry();
     }
@@ -119,10 +89,10 @@ public class Reports {
     }
 
     public void LargestCancelationsHosts () {
-        MySQLObj.ViewLargestCancelationsHosts();
+        MySQLObj.ViewLargestCancellationsHosts();
     }
     public void LargestCancelationsRenters () {
-        MySQLObj.ViewLargestCancelationsRenters();
+        MySQLObj.ViewLargestCancellationsRenters();
     }
     public void DisplayMostPopularNPForListing() {
     }

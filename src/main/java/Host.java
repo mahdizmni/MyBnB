@@ -1,9 +1,6 @@
-import javax.security.sasl.SaslServer;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.util.Scanner;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 public class Host extends User{
     public Host(User u) {
@@ -37,11 +34,10 @@ public class Host extends User{
             }
         }
     }
-    // TODO: check date
 
+    // TODO: check date
     public void createListing() throws SQLException {
         Scanner input = new Scanner(System.in);
-        System.out.println("create a listing");
 
         double lat, lon;
         String amenities, type;
@@ -52,25 +48,24 @@ public class Host extends User{
         boolean addtoaddress, addtocity, addtocountry;
         addtoaddress = false; addtocity = false; addtocountry = false;
 
-        System.out.println("please insert the postalcode with space");
-        postalcode = input.nextLine();
-        System.out.println("please insert num");
+        System.out.println("Please insert the street number.");
         num = Integer.parseInt(input.nextLine());
-        System.out.println("please insert the street");
+        System.out.println("Please insert the street.");
         street = input.nextLine();
-        System.out.println("please insert the city");
+        System.out.println("Please insert the city.");
         city = input.nextLine();
-        System.out.println("please insert the country");
+        System.out.println("Please insert the country.");
         country = input.nextLine();
-        System.out.println("please insert the lat");
+        System.out.println("Please insert the postal code with space.");
+        postalcode = input.nextLine();
+        System.out.println("Please insert the latitude.");
         lat = Double.parseDouble(input.nextLine());
-        System.out.println("please insert the lon");
+        System.out.println("Please insert the longitude.");
         lon = Double.parseDouble(input.nextLine());
-        System.out.println("please insert the type of your listing (print the options?)");
+        System.out.println("Please insert the type of your listing.");
         type = input.nextLine();
 
         // check if a listing already exists
-        // TA:  more efficient
         if (MySQLObj.addToAddress(postalcode, street, num))
             address_id = MySQLObj.getRecentID();
         else  addtoaddress = true;
@@ -84,10 +79,9 @@ public class Host extends User{
         else  addtocountry = true;
 
         if (addtoaddress && addtocity && addtocountry) {
-            System.out.println("listing already exists! plz try again");
+            Utils.printInfo("Listing already exists! Please try again.");
             return;
         }
-        // TODO: efficiency
 
         if (addtoaddress)
             address_id = MySQLObj.getAddressID(postalcode, num);
@@ -106,15 +100,13 @@ public class Host extends User{
 
         MySQLObj.addToOwns(getSin(), listing_id);
 
-//        System.out.println("listing id: " + listing_id + "type id :" + type_id + "address id : " + address_id + "city id : " + city_id + "country id : " + country_id);
         // Linking corresponding tables
         MySQLObj.addToListingsType(listing_id, type_id);
         MySQLObj.addToBelongsTo(city_id, country_id);
         MySQLObj.addToLocatedIn(address_id, listing_id);
         MySQLObj.addToIsIn(address_id, city_id);
 
-
-        System.out.println("please insert one amenity at a time. press q to finish");
+        System.out.println("Please insert one amenity at a time. Press q to finish.");
         boolean stop = false;
         while (!stop) {
             amenities = input.nextLine();
@@ -131,17 +123,17 @@ public class Host extends User{
             }
         }
 
-        System.out.println("please insert the available periods and price of your listing one at a time. press q to finish");
+        System.out.println("Please insert the available periods and price of your listing one at a time. Press q to finish");
         stop = false;
         while (!stop) {
-            System.out.println("press y to add a period, q to finish");
+            System.out.println("Press y to add a period, q to finish.");
             buff = input.nextLine();
             if (!buff.equals("q")) {
-                System.out.println("start date(e.g 20220907):");
+                System.out.println("Start date(e.g 20220907):");
                 start = Integer.parseInt(input.nextLine());
-                System.out.println("end date(e.g 20220907):");
+                System.out.println("End date(e.g 20220907):");
                 end = Integer.parseInt(input.nextLine());
-                System.out.println("price:");
+                System.out.println("Period price:");
                 price = Float.parseFloat(input.nextLine());
 
                 // add these to table
@@ -151,153 +143,152 @@ public class Host extends User{
                     period_id = MySQLObj.getPeriodID(start ,end);
 
                 if (!MySQLObj.addToAvailableIn(listing_id, period_id, price))
-                    System.out.println("already added!");
+                    Utils.printInfo("Listing already added.");
             } else {
                 stop = true;
             }
 
         }
-
+        Utils.printInfo("Listing successfully created!");
     }
 
     public void cancelBooking(){
         // TODO: today's date in consideration
         Scanner input = new Scanner(System.in);
-        System.out.println("Cancel a booking");
-        System.out.println("list of all booked listings");
+        System.out.println("List of all booked listings: ");
         MySQLObj.ViewAllBookedListings(getSin());
-        System.out.println("enter a booking id to cancel");
+        System.out.println("Choose a valid booking id: ");
         int booking_id = Integer.parseInt(input.nextLine());
         int listing_id = MySQLObj.BookingIDToListingID(booking_id);
         if (listing_id == -1) {
-            System.out.println("invalid booking id");
+            Utils.printInfo("Invalid booking ID.");
             return;
         }
         if (!MySQLObj.OwnsListing(listing_id, getSin())) {
-            System.out.println("you dont own this listing!");
+            Utils.printInfo("User does not own this listing.");
             return;
         }
         if (!MySQLObj.isReserved(booking_id)) {
-            System.out.println("has not been reserved");
+            Utils.printInfo("Booking has not been reserved");
             return;
         }
-        if (MySQLObj.CancelBookedListing(booking_id))
-            System.out.println("success");
+        if (!MySQLObj.CancelBookedListing(booking_id)){
+            Utils.printInfo("Cancel booking was not successful.");
+            return;
+        }
+        Utils.printInfo("Successfully cancelled booking!");
     }
 
     public void removeListing(){
         Scanner input = new Scanner(System.in);
-        System.out.println("Remove a listing");
         System.out.println("All listings");
         MySQLObj.ViewAllHostListings(getSin());
-        System.out.println("enter a listing id");
+        System.out.println("Choose a valid listing ID: ");
         int listing_id = Integer.parseInt(input.nextLine());
-
         if (!MySQLObj.ValidateListingID(listing_id)) {
-            System.out.println("invalid listing id");
+            Utils.printInfo("Invalid listing ID.");
             return;
         }
-
         if (!MySQLObj.OwnsListing(listing_id, getSin())) {
-            System.out.println("you dont own this listing!");
+            Utils.printInfo("User does not own this listing.");
             return;
         }
-
-        if (MySQLObj.RemoveListing(listing_id))
-            System.out.println("success");
+        if (!MySQLObj.RemoveListing(listing_id)){
+            Utils.printInfo("Remove listing was not successful.");
+            return;
+        }
+        Utils.printInfo("Successfully removed listing!");
     }
 
     public void updatePrice() throws ParseException, SQLException {
         Scanner input = new Scanner(System.in);
-        System.out.println("Update Price");
         System.out.println("All listings");
         MySQLObj.ViewAllHostListings(getSin());
-        System.out.println("enter a listing id");
+        System.out.println("Choose a valid listing ID: ");
         int listing_id = Integer.parseInt(input.nextLine());
 
         if (!MySQLObj.ValidateListingID(listing_id)) {
-            System.out.println("invalid listing id");
+            Utils.printInfo("Invalid listing ID.");
             return;
         }
 
         if (!MySQLObj.OwnsListing(listing_id, getSin())) {
-            System.out.println("you dont own this listing!");
+            Utils.printInfo("User does not own this listing.");
             return;
         }
 
+        System.out.println("All Periods of Listing:");
         MySQLObj.ViewAllListingsWithPrice(getSin(), listing_id);
 
-        System.out.println("choose an ID");
+        System.out.println("Choose a valid period ID: ");
         int period_id = Integer.parseInt(input.nextLine());
 
         listing_id = MySQLObj.PeriodIDToListingID(period_id);
         if (listing_id == -1)  {
-            System.out.println("invalid id!");
+            Utils.printInfo("Invalid period ID.");
             return;
         }
 
         if (!MySQLObj.OwnsListing(listing_id, getSin())) {
-            System.out.println("you dont own this listing!");
+            Utils.printInfo("User does not own this listing.");
             return;
         }
 
         if (MySQLObj.BookedWithinAvailability(listing_id, period_id) == -1) {
-            System.out.println("already booked!");
+            Utils.printInfo("Listing has already been booked in that period.");
             return;
         }
 
-        System.out.println("set a price");          // TODO: valid price
+        System.out.println("Set a price");
         float price = Float.parseFloat(input.nextLine());
 
-        if (MySQLObj.UpdatePrice(listing_id, period_id, price))
-            System.out.println("success");
-
-
-        return;
+        if (!MySQLObj.UpdatePrice(listing_id, period_id, price)){
+            Utils.printInfo("Price update was unsuccessful.");
+        }
+        Utils.printInfo("Successfully updated price!");
     }
 
     public void updateAvailability() throws SQLException, ParseException {
         Scanner input = new Scanner(System.in);
-        System.out.println("Update Availability");
         System.out.println("All listings");
         MySQLObj.ViewAllHostListings(getSin());
-        System.out.println("enter a listing id");
+        System.out.println("Choose a valid listing ID: ");
         int listing_id = Integer.parseInt(input.nextLine());
 
         if (!MySQLObj.ValidateListingID(listing_id)) {
-            System.out.println("invalid listing id");
+            Utils.printInfo("Invalid listing id");
             return;
         }
 
         if (!MySQLObj.OwnsListing(listing_id, getSin())) {
-            System.out.println("you dont own this listing!");
+            Utils.printInfo("User does not own this listing.");
             return;
         }
 
         MySQLObj.ViewAllListingsWithPrice(getSin(), listing_id);
 
-        System.out.println("choose an ID");
+        System.out.println("Choose a valid period ID: ");
         int period_id = Integer.parseInt(input.nextLine());
 
         listing_id = MySQLObj.PeriodIDToListingID(period_id);
         if (listing_id == -1)  {
-            System.out.println("invalid id!");
+            Utils.printInfo("Invalid period ID.");
             return;
         }
 
         if (!MySQLObj.OwnsListing(listing_id, getSin())) {
-            System.out.println("you dont own this listing!");
+            Utils.printInfo("User does not own this listing.");
             return;
         }
 
         if (MySQLObj.BookedWithinAvailability(listing_id, period_id) == -1) {
-            System.out.println("already booked!");
+            Utils.printInfo("Listing has already been booked in that period.");
             return;
         }
 
-        System.out.println("start date(e.g 20220907):");
+        System.out.println("Please choose a valid start date (e.g 20220907):");
         int start = Integer.parseInt(input.nextLine());
-        System.out.println("end date(e.g 20220907):");
+        System.out.println("Please choose a valid end date (e.g 20220907):");
         int end = Integer.parseInt(input.nextLine());
 
         int previous_period_id = period_id;
@@ -310,68 +301,66 @@ public class Host extends User{
         // new time does not overlap
         if (MySQLObj.DoesNotOverlap(start, listing_id)) {
             MySQLObj.UpdateAvailability(listing_id, period_id, previous_period_id);
-            System.out.println("success");
+            Utils.printInfo("Updated availability successfully!");
         } else {
-            System.out.println("overlaps!");
+            Utils.printInfo("Period overlaps. Please try again.");
         }
-
-
-        return;
-
     }
 
     public void getHistory(){
         MySQLObj.ViewGetHistory(getSin());
     }
 
-
     public void comment() throws SQLException {
         // TODO: recently
         Scanner input = new Scanner(System.in);
-        System.out.println("Comment on past renters");
+        System.out.println("Comment on past renters: ");
         // show all past renters with associated listing id
         MySQLObj.ViewListingsHistory(getSin());
         // choose a renter
-        System.out.println("insert a renter id");
+        System.out.println("Choose a valid renter ID: ");
         int renter_sin = Integer.parseInt(input.nextLine());
         // check if it's a valid renter (user sin)
         if (!MySQLObj.ValidateUserID(renter_sin)) {
-            System.out.println("invalid User!");
+            Utils.printInfo("User ID is not valid.");
             return;
         }
-        // check if has rented from this host before
+        // check if renter has rented from this host before
         if (!MySQLObj.MyRenter(renter_sin, getSin())) {
-            System.out.println("has not rented from you!");
+            Utils.printInfo("User has not rented your listings before.");
             return;
         }
         // insert comment
         System.out.println("insert a comment. hit enter to send.");
         String comment = input.nextLine();
-        if (MySQLObj.CommentsOnUser(getSin(), renter_sin, comment))
-            System.out.println("success");
+        if (!MySQLObj.CommentsOnUser(getSin(), renter_sin, comment)){
+            Utils.printInfo("Comment was unsuccessful.");
+        }
+        Utils.printInfo("Successfully commented on User.");
     }
     public void rate() throws SQLException {
         Scanner input = new Scanner(System.in);
-        System.out.println("rate on past renters");
         // show all past renters with associated listing id
         MySQLObj.ViewListingsHistory(getSin());
         // choose a renter
-        System.out.println("insert a renter id");
+        System.out.println("Choose a valid renter ID:");
         int renter_sin = Integer.parseInt(input.nextLine());
         // check if it's a valid renter (user sin)
         if (!MySQLObj.ValidateUserID(renter_sin)) {
-            System.out.println("invalid User!");
+            Utils.printInfo("User ID is not valid.");
             return;
         }
-        // check if has rented from this host before
+        // check if renter has rented from this host before
         if (!MySQLObj.MyRenter(renter_sin, getSin())) {
-            System.out.println("has not rented from you!");
+            Utils.printInfo("User has not rented your listings before.");
             return;
         }
         // insert score
-        System.out.println("insert a rating out of 10. hit enter to send.");
+        System.out.println("Insert a rating out of 5. Hit enter to send.");
         int rate = Integer.parseInt(input.nextLine());
-        if (MySQLObj.RatesOnUser(getSin(), renter_sin, rate))
-            System.out.println("success");
+        if (!MySQLObj.RatesOnUser(getSin(), renter_sin, rate)){
+            Utils.printInfo("Rating was unsuccessful.");
+        }
+        Utils.printInfo("Successfully rated User.");
     }
 }
