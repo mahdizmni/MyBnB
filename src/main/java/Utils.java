@@ -73,10 +73,6 @@ public class Utils {
         }
     }
 
-    public static boolean IsWithinDate(Date Ostart, Date Oend, Date start, Date end) {
-        return start.after(Ostart) && end.before(Oend);
-    }
-
     public static String getTodayString(){
         return formatDateToString(getToday());
     }
@@ -88,6 +84,10 @@ public class Utils {
         }
         newString.append(s);
         return newString.toString();
+    }
+
+    public static boolean IsWithinDate(Date Ostart, Date Oend, Date start, Date end) {
+        return start.after(Ostart) && end.before(Oend);
     }
 
     public static String formatAddress(Object [] addressInfo){

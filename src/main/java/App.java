@@ -32,7 +32,7 @@ public class App {
 
         exit = false;
         while(!exit){
-            Utils.printMenu("Renter/Host", new String[]{"Renter", "Host"});
+            Utils.printMenu("Renter/Host/Search", new String[]{"Renter", "Host", "Search"});
             String userInput = scan.nextLine();
             switch (userInput) {
                 case "1":
@@ -44,6 +44,10 @@ public class App {
                     assert user != null;
                     Host host = new Host(user);
                     host.mainLoop();
+                    break;
+                case "3":
+                    Search search = new Search();
+                    search.mainLoop();
                     break;
                 case "q":
                     exit = true;
