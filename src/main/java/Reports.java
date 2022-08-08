@@ -12,15 +12,33 @@ public class Reports {
                     new String[]{
                             "Total number of bookings in a date range in a city",
                             "Total number of bookings in a city with a zipcode",
-                            "Remove a listing",
-                            "Update price of listing",
-                            "Update availability of listing",
-                            "Get history of past renters",
-                            "Comment on past renters"});
+                            "Get total number of listings by country",
+                            "Get total number of listings by country & city",
+                            "Get total number of listings by country & city & postal code",
+                            "Get ranked host by listings per country",
+                            "Get ranked host by listings per city",
+                            "Get commercial hosts",
+                            "Get ranked renters by booking in period",
+                            "Get ranked renters by booking in period per city",
+                            "Get hosts with the largest cancellations",
+                            "Get renters with the largest cancellations",
+                            "Get most popular noun phrases from comments",
+                    });
             String userInput = scan.nextLine();
             switch (userInput) {
                 case "1"-> NumBookings1();
                 case "2"-> NumBookings2();
+                case "3"-> MySQLObj.ViewCountListingsByCountry();
+                case "4"-> MySQLObj.ViewCountListingsByCountryCity();
+                case "5"-> MySQLObj.ViewCountListingsByCountryCityPostalcode();
+                case "6"-> MySQLObj.ViewRankHostsByListingsPerCountry();
+                case "7"-> MySQLObj.ViewRankHostsByListingsPerCity();
+                case "8"-> MySQLObj.ViewCommercialHosts();
+                case "9"-> RankRentersByBookingInPeriod();
+                case "10"-> RankRentersByBookingInPeriodPerCity();
+                case "11"-> MySQLObj.ViewLargestCancellationsHosts();
+                case "12"-> MySQLObj.ViewLargestCancellationsRenters();
+                case "13"-> DisplayMostPopularNPForListing();
                 case "q" -> exit = true;
             }
         }
@@ -48,26 +66,7 @@ public class Reports {
         if (res > -1)
             System.out.println("Number of Bookings in the specified date range and location: " + res);
     }
-    public void ListingsNumberPerCountry() {
-        MySQLObj.ViewCountListingsByCountry();
-    }
 
-    public void ListingsNumberPerCountryCity() {
-        MySQLObj.ViewCountListingsByCountryCity();
-    }
-
-    public void ListingsNumberPerCountryCityPostalcode() {
-        MySQLObj.ViewCountListingsByCountryCityPostalcode();
-    }
-    public void RankHostsByListingsPerCountry() {
-        MySQLObj.ViewRankHostsByListingsPerCountry();
-    }
-    public void RankHostsByListingsPerCity() {
-        MySQLObj.ViewRankHostsByListingsPerCity();
-    }
-    public void CommercialHosts() {
-        MySQLObj.ViewCommercialHosts();
-    }
     public void RankRentersByBookingInPeriod() {
         Scanner scan = new Scanner(System.in);
         System.out.println("enter start date");
@@ -88,12 +87,6 @@ public class Reports {
 
     }
 
-    public void LargestCancelationsHosts () {
-        MySQLObj.ViewLargestCancellationsHosts();
-    }
-    public void LargestCancelationsRenters () {
-        MySQLObj.ViewLargestCancellationsRenters();
-    }
     public void DisplayMostPopularNPForListing() {
     }
 

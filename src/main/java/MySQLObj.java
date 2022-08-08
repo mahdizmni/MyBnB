@@ -10,7 +10,7 @@ import java.util.Date;
 public class MySQLObj {
     private final String uriDb = "jdbc:mysql://localhost:3306/MyBnB";
     private final String username = "root";
-    private final String password = "Mz2468!0";
+    private final String password = "";
     private static Connection con;
     private static Statement st;
     private static MySQLObj instance = null;
@@ -776,6 +776,8 @@ public class MySQLObj {
                     SELECT Count(b.BookingID) FROM
                     Books AS b JOIN LocatedIn AS l ON l.Listing_ID = b.Listing_ID
                     JOIN Address AS a ON a.ID = l.Address_ID
+                    JOIN IsIn ON IsIn.Address_ID = l.Address_ID
+                    JOIN City ON City.ID = IsIn.City_ID
                     WHERE a.postalcode = ? AND City.name = ?;
                     """;
             PreparedStatement ps = con.prepareStatement(query);
@@ -994,7 +996,7 @@ public class MySQLObj {
         ResultSet rs = null;
         try {
             String query = """
-                    SELECT u.email, co.name, ci.name AS "city", COUNT(o.Listing_ID) AS "# of Listings" FROM
+                    SELECT u.email, co.name, ci.name, COUNT(o.Listing_ID) AS "# of Listings" FROM
                     User AS u JOIN Owns AS o ON o.Host_SIN = u.SIN
                     JOIN LocatedIn ON LocatedIn.Listing_ID = o.Listing_ID
                     JOIN IsIn On IsIn.Address_ID = LocatedIn.Address_ID

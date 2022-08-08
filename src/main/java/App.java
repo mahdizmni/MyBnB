@@ -10,12 +10,22 @@ public class App {
         User user = null;
         boolean exit = false;
         while(!exit && user == null){
-            Utils.printMenu("Register/Login", new String[]{"Register", "Login"});
+            Utils.printMenu("Register/Login", new String[]{"Register", "Login", "Reports"});
             String userInput = scan.nextLine();
             switch (userInput) {
-                case "1"-> Register.register();
-                case "2"-> user = Login.login();
-                case "q" -> exit = true;
+                case "1":
+                    Register.register();
+                    break;
+                case "2":
+                    user = Login.login();
+                    break;
+                case "3":
+                    Reports reports = new Reports();
+                    reports.mainLoop();
+                    break;
+                case "q":
+                    exit = true;
+                    break;
             }
         }
         Utils.printInfo("Login Successful!");
