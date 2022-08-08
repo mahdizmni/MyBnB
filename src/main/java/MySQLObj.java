@@ -1,3 +1,6 @@
+import jdk.jshell.execution.Util;
+
+import javax.rmi.ssl.SslRMIClientSocketFactory;
 import java.sql.*;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -380,11 +383,15 @@ public class MySQLObj {
             Utils.printError("Something went wrong!", e.getMessage());
         }
     }
-    public static void ViewListingsHistory(int host_sin) {
+    public static boolean ViewListingsHistory(int host_sin) {
         ArrayList<ArrayList<Object>> listingsList = new ArrayList<>();
         ResultSet listings = null;
         try{
             listings = ListingsHistory(host_sin);
+            if (listings == null) {
+                System.out.println("empty");
+                return false;
+            }
             while (listings.next()) {
                 ArrayList<Object> listingData = new ArrayList<Object>();
                 listingData.add(listings.getInt("Listing_ID"));
@@ -394,22 +401,26 @@ public class MySQLObj {
                 listingsList.add(listingData);
             }
             Utils.printTable(new String[]{"Listing ID", "User ID", "Start of reservation", "End of reservation"},listingsList);
+            return true;
         }
         catch (Exception e){
             Utils.printError("Something went wrong!", e.getMessage());
+            return  false;
         }
     }
     public static ResultSet ListingsHistory(int host_sin) {
         ResultSet rs = null;
         try {
+            String lastyear = Utils.formatDateToString(Utils.addDays(Utils.getToday(), -365));
             String query = """
                     SELECT o.Listing_ID, b.Renter_SIN, b.start, b.end FROM
                     Owns AS o JOIN Books AS b ON o.Listing_ID = b.Listing_ID
-                    WHERE b.isReserved = True AND o.Listing_ID IN (SELECT Listing_ID FROM OWNS
+                    WHERE b.isReserved = True AND b.end >= ? AND o.Listing_ID IN (SELECT Listing_ID FROM OWNS
                                                                     WHERE Host_SIN = ?);
                     """;
             PreparedStatement ps = con.prepareStatement(query);
-            ps.setInt(1, host_sin);
+            ps.setString(1, lastyear);
+            ps.setInt(2, host_sin);
             rs = ps.executeQuery();
 
             return rs;
@@ -626,38 +637,6 @@ public class MySQLObj {
         }
     }
 
-    public static String GetEndDate (int period_ID) {
-        try {
-            String query = """
-                    SELECT end FROM Period
-                    WHERE ID = ?;
-                    """;
-            PreparedStatement ps = con.prepareStatement(query);
-            ps.setInt(1, period_ID);
-            ResultSet rs = ps.executeQuery();
-            rs.next();
-            return rs.getString(1);
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-            return "not found";
-        }
-    }
-    public static String GetStartDateFromBooks (int listing_id) {
-        try {
-            String query = """
-                    SELECT start FROM Books 
-                    WHERE Listing_ID = ?;
-                    """;
-            PreparedStatement ps = con.prepareStatement(query);
-            ps.setInt(1, listing_id);
-            ResultSet rs = ps.executeQuery();
-            rs.next();
-            return rs.getString(1);
-        } catch (SQLException e) {
-            System.out.println(e.getMessage());
-            return "not found";
-        }
-    }
     public static boolean UpdateAvailability (int listing_id, int period_id, int previous_period_id) {
         try {
             String query = """
@@ -701,8 +680,10 @@ public class MySQLObj {
         ArrayList<ArrayList<Object>> listingsList = new ArrayList<>();
         while (listings.next()) {
             ArrayList<Object> listingData = new ArrayList<Object>();
+            listingData.add(listings.getString("Ostart"));
             listingData.add(listings.getString("end"));
             listingData.add(listings.getString("start"));
+            listingData.add(listings.getString("Oend"));
             listingsList.add(listingData);
         }
 
@@ -711,9 +692,11 @@ public class MySQLObj {
         }
         SimpleDateFormat sdf = new SimpleDateFormat(Utils.sdfPattern);
         for (int i = 0; i < listingsList.size(); i++) {
-            Date start = sdf.parse((String) listingsList.get(i).get(1));
-            Date end = sdf.parse((String) listingsList.get(i).get(0));
-            if (Utils.IsWithinDate(end, start))
+            Date Ostart = sdf.parse((String) listingsList.get(i).get(0));
+            Date end = sdf.parse((String) listingsList.get(i).get(1));
+            Date start = sdf.parse((String) listingsList.get(i).get(2));
+            Date Oend = sdf.parse((String) listingsList.get(i).get(3));
+            if (Utils.IsWithinDate(Ostart, Oend, start, end))
                 return -1;
         }
 
@@ -723,7 +706,7 @@ public class MySQLObj {
         ResultSet rs = null;
         try {
             String query = """
-                    SELECT p.end, b.start FROM
+                    SELECT p.start AS Ostart ,p.end, b.start , b.end AS Oend FROM
                     Books AS b JOIN AvailableIn ON b.Listing_ID = AvailableIn.Listing_ID
                     JOIN Period AS p ON p.ID = AvailableIn.Period_ID
                     WHERE b.Listing_ID = ? AND p.ID = ? AND b.isReserved = True;
@@ -752,16 +735,17 @@ public class MySQLObj {
             return false;
         }
     }
-    public static boolean DoesNotOverlap(int start, int listing_id) {
+    public static boolean DoesNotOverlap(int start, int end, int listing_id) {
         try {
             String query = """
-                    SELECT DISTINCT start FROM Period
-                    WHERE start = ? AND start <= ANY (SELECT end FROM AvailableIn
-                                                    WHERE Listing_ID = ?);
+                    SELECT p.start ,p.end FROM
+                    AvailableIn As ai JOIN Period AS p ON ai.Period_ID = p.ID
+                    WHERE ai.Listing_ID = ? AND (? > p.end OR ? < p.start);
                     """;
             PreparedStatement ps = con.prepareStatement(query);
-            ps.setInt(1, start);
-            ps.setInt(2, listing_id);
+            ps.setInt(1, listing_id);
+            ps.setInt(2, start);
+            ps.setInt(3, end);
             ResultSet rs = ps.executeQuery();
             return !rs.next();
         } catch (SQLException e) {
@@ -771,7 +755,10 @@ public class MySQLObj {
     }
     public static boolean RatesOnUser(int user1, int user2, int score) throws SQLException {
         try {
-            // todo: check rating validity 1- 5
+            if (score < 1 || score > 5) {
+                System.out.println("out of bounds value for score. choose 1-5");
+                return false;
+            }
             String query = "INSERT INTO RatedOnUser(User1_SIN, User2_SIN, score) VALUES (?, ?, ?)";
             PreparedStatement ps = con.prepareStatement(query);
             ps.setInt(1, user1);

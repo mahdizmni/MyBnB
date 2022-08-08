@@ -73,8 +73,8 @@ public class Utils {
         }
     }
 
-    public static boolean IsWithinDate(Date end, Date start) {
-        return start.before(end);
+    public static boolean IsWithinDate(Date Ostart, Date Oend, Date start, Date end) {
+        return start.after(Ostart) && end.before(Oend);
     }
 
     public static String getTodayString(){

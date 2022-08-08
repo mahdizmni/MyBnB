@@ -146,6 +146,8 @@ public class Host extends User{
 
                 if (!MySQLObj.addToAvailableIn(listing_id, period_id, price))
                     Utils.printInfo("Listing already added.");
+                if (!MySQLObj.DoesNotOverlap(start, end, listing_id))
+                    System.out.println("overlap!");
             } else {
                 stop = true;
             }
@@ -302,7 +304,7 @@ public class Host extends User{
             period_id = MySQLObj.getPeriodID(start ,end);
 
         // new time does not overlap
-        if (MySQLObj.DoesNotOverlap(start, listing_id)) {
+        if (MySQLObj.DoesNotOverlap(start, end, listing_id)) {
             MySQLObj.UpdateAvailability(listing_id, period_id, previous_period_id);
             Utils.printInfo("Updated availability successfully!");
         } else {
@@ -319,7 +321,9 @@ public class Host extends User{
         Scanner input = new Scanner(System.in);
         System.out.println("Comment on past renters: ");
         // show all past renters with associated listing id
-        MySQLObj.ViewListingsHistory(getSin());
+        if (!MySQLObj.ViewListingsHistory(getSin())) {
+            return;
+        }
         // choose a renter
         System.out.println("Choose a valid renter ID: ");
         int renter_sin = Integer.parseInt(input.nextLine());
