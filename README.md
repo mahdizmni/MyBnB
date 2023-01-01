@@ -1,2 +1,3 @@
 # MyBnB
-Designed a DB for an airbnb-like website.
+Designed a database that supports the operations of a
+platform such as the popular home sharing service AirBnB.
